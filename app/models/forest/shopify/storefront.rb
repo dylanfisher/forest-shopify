@@ -2,7 +2,7 @@ require 'graphql/client'
 require 'graphql/client/http'
 
 # https://github.com/github/graphql-client
-module Forest::Shopify::Storefront
+class Forest::Shopify::Storefront
   # Configure GraphQL endpoint using the basic HTTP network adapter.
   HTTP = GraphQL::Client::HTTP.new(Rails.application.credentials[:shopify_graphql_endpoint]) do
     def headers(context)

@@ -1,4 +1,5 @@
 require "forest/shopify/engine"
+require "forest/shopify/migrations"
 
 module Forest
   module Shopify
