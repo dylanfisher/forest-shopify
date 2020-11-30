@@ -1,3 +1,17 @@
+<% content_for :index_header_button_group do %>
+  <%= form_with url: sync_admin_forest_shopify_products_path, local: true do %>
+    <%= submit_tag 'Sync Now', class: 'btn btn-outline-secondary' %>
+  <% end %>
+<% end %>
+
+<% if Setting.for(:forest_shopify_last_sync_products).present? %>
+  <% content_for :index_header_body do %>
+    <div class="text-muted ml-auto">
+      Last synced <%= time_ago_in_words Time.at(Setting.for(:forest_shopify_last_sync_products).to_i).to_datetime %> ago.
+    </div>
+  <% end %>
+<% end %>
+
 <%= render 'admin/headers/index', records: @products, model_name: 'Forest::Shopify::Product' %>
 
 <div class="table-responsive">
@@ -11,6 +25,7 @@
         <th><%= table_sorter title: 'Slug', path: :admin_forest_shopify_products_path, scope: :by_slug, default_order: :asc %></th>
         <th>Title</th>
         <th>Handle</th>
+        <th>Shopify ID</th>
         <th>Available For Sale</th>
         <th><%= table_sorter title: 'Created&nbsp;at'.html_safe, path: :admin_forest_shopify_products_path, scope: :by_created_at, default_order: :desc %></th>
         <th><%= table_sorter title: 'Updated&nbsp;at'.html_safe, path: :admin_forest_shopify_products_path, scope: :by_updated_at, default_order: :desc %></th>
@@ -28,6 +43,7 @@
           <td><%= product.slug %></td>
           <td><%= product.title %></td>
           <td><%= product.handle %></td>
+          <td><%= product.shopify_id %></td>
           <td><%= product.available_for_sale %></td>
           <td><%= forest_date product.created_at %></td>
           <td><%= forest_date product.updated_at %></td>

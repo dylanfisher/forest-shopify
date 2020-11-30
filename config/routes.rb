@@ -2,7 +2,11 @@ Rails.application.routes.draw do
   namespace :admin do
     namespace :forest do
       namespace :shopify do
-        resources :products
+        resources :products do
+          collection do
+            post 'sync'
+          end
+        end
       end
     end
   end

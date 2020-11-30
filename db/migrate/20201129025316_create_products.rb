@@ -7,6 +7,7 @@ class CreateProducts < ActiveRecord::Migration[6.0]
       t.text :description_html
       t.string :handle
       t.string :shopify_id
+      t.string :shopify_id_base64
       t.string :product_type
       t.datetime :shopify_published_at
       t.string :title
@@ -18,5 +19,8 @@ class CreateProducts < ActiveRecord::Migration[6.0]
     end
     add_index :forest_shopify_products, :slug, unique: true
     add_index :forest_shopify_products, :shopify_id
+    add_index :forest_shopify_products, :shopify_id_base64
+    add_index :forest_shopify_products, :available_for_sale
+    add_index :forest_shopify_products, :shopify_published_at
   end
 end

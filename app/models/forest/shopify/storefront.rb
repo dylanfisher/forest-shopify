@@ -21,18 +21,20 @@ class Forest::Shopify::Storefront
   # However, it's smart to dump this to a JSON file and load from disk
   #
   # Run it from a script or rake task
-  #   GraphQL::Client.dump_schema(Storefront::HTTP, 'path/to/schema.json')
+  #   GraphQL::Client.dump_schema(Forest::Shopify::Storefront::HTTP, 'path/to/schema.json')
   #
   # Schema = GraphQL::Client.load_schema('path/to/schema.json')
 
-  schema_path = Rails.root.join('public', 'storefront', 'schema.json').to_s
+  schema_dir = Rails.root.join('public', 'forest', 'shopify', 'storefront').to_s
+  schema_file = "#{schema_dir}/schema.json"
 
-  if !File.exist?(schema_path) || (Time.current - File.mtime(schema_path) > 1.week.seconds)
-    FileUtils.touch(schema_path)
-    GraphQL::Client.dump_schema(Storefront::HTTP, schema_path)
+  if !File.exist?(schema_file) || (Time.current - File.mtime(schema_file) > 1.week.seconds)
+    FileUtils.mkdir_p(schema_dir)
+    FileUtils.touch(schema_file)
+    GraphQL::Client.dump_schema(Forest::Shopify::Storefront::HTTP, schema_file)
   end
 
-  Schema = GraphQL::Client.load_schema(schema_path)
+  Schema = GraphQL::Client.load_schema(schema_file)
 
   Client = GraphQL::Client.new(schema: Schema, execute: HTTP)
 end

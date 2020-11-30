@@ -41,11 +41,21 @@ class Admin::Forest::Shopify::ProductsController < Admin::ForestController
     redirect_to admin_forest_shopify_products_url, notice: 'Product was successfully destroyed.'
   end
 
+  def sync
+    if Forest::Shopify::Storefront::Products.sync
+      notice = 'Products were successfully synced.'
+    else
+      notice = 'Products failed to sync.'
+    end
+
+    redirect_to admin_forest_shopify_products_path, notice: notice
+  end
+
   private
 
   def product_params
     # Add blockable params to the permitted attributes if this record is blockable `**BlockSlot.blockable_params`
-    params.require(:product).permit(:slug, :status, :available_for_sale, :shopify_created_at, :description, :description_html, :handle, :shopify_id, :product_type, :shopify_published_at, :title)
+    params.require(:product).permit(:slug, :status, :available_for_sale, :shopify_created_at, :description, :description_html, :handle, :shopify_id, :shopify_id_base64, :product_type, :shopify_published_at, :title)
   end
 
   def set_product
