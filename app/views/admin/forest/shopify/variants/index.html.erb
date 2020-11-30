@@ -1,0 +1,56 @@
+<%= render 'admin/headers/index', records: @variants, model_name: 'Forest::Shopify::Variant' %>
+
+<div class="table-responsive">
+  <table class="forest-table table table-striped table-sm">
+    <thead>
+      <tr>
+        <% if Forest::Shopify::Variant.statusable? %>
+          <th></th>
+        <% end %>
+        <th><%= table_sorter title: 'ID', path: :admin_forest_shopify_variants_path, scope: :by_id, default_order: :desc %></th>
+        <th><%= table_sorter title: 'Slug', path: :admin_forest_shopify_variants_path, scope: :by_slug, default_order: :asc %></th>
+        <th>Title</th>
+        <th>Price</th>
+        <th>Available For Sale</th>
+        <th><%= table_sorter title: 'Created&nbsp;at'.html_safe, path: :admin_forest_shopify_variants_path, scope: :by_created_at, default_order: :desc %></th>
+        <th><%= table_sorter title: 'Updated&nbsp;at'.html_safe, path: :admin_forest_shopify_variants_path, scope: :by_updated_at, default_order: :desc %></th>
+        <th colspan="3"></th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <% @variants.each do |variant| %>
+        <tr>
+          <% if Forest::Shopify::Variant.statusable? %>
+            <td><%= status_indicator variant %></td>
+          <% end %>
+          <td><%= variant.id %></td>
+          <td><%= variant.slug %></td>
+          <td><%= variant.title %></td>
+          <td><%= variant.price %></td>
+          <td><%= variant.available_for_sale %></td>
+          <td><%= forest_date variant.created_at %></td>
+          <td><%= forest_date variant.updated_at %></td>
+          <td width="1">
+            <%= link_to 'Edit', edit_admin_forest_shopify_variant_path(variant), class: 'btn btn-xs btn-primary', role: 'button' %>
+          </td>
+          <% if try('variant_path', variant) %>
+            <% if variant.respond_to?(:to_friendly_param) %>
+              <% param = variant.to_friendly_param %>
+            <% else %>
+              <% param = variant %>
+            <% end %>
+            <td width="1">
+              <%= link_to 'Show', variant_path(param), class: 'btn btn-xs btn-info', role: 'button', data: { turbolinks: false } %>
+            </td>
+          <% end %>
+          <td width="1">
+            <%= link_to 'Destroy', [:admin, :forest, :shopify, variant], method: :delete, class: 'btn btn-xs btn-danger', role: 'button', data: { confirm: 'Are you sure you want to destroy this Variant?' } %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+
+<%= pagy_bootstrap_nav_js(@pagy).html_safe if @pagy.pages > 1 %>

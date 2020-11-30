@@ -1,4 +1,5 @@
 class Forest::Shopify::Storefront::Products
+  # Forest::Shopify::Storefront::Client.query(Forest::Shopify::Storefront::Products::Query)
   # Forest::Shopify::Storefront::Products.sync
 
   Query = Forest::Shopify::Storefront::Client.parse <<-'GRAPHQL'
@@ -19,10 +20,10 @@ class Forest::Shopify::Storefront::Products
             productType
             publishedAt
             title
-            variants(first: 10) {
+            variants(first: 250) {
               edges {
+                cursor
                 node {
-                  available
                   availableForSale
                   compareAtPrice
                   id
@@ -31,10 +32,18 @@ class Forest::Shopify::Storefront::Products
                   title
                   weight
                   weightUnit
+                  image {
+                    altText
+                    id
+                    src
+                  }
                 }
               }
+              pageInfo {
+                hasNextPage
+              }
             }
-            images(first: 10) {
+            images(first: 250) {
               edges {
                 node {
                   altText
@@ -42,13 +51,16 @@ class Forest::Shopify::Storefront::Products
                   src
                 }
               }
+              pageInfo {
+                hasNextPage
+              }
             }
-            options(first: 3) {
+            options(first: 250) {
               id
               name
               values
             }
-            metafields(first: 10) {
+            metafields(first: 250) {
               edges {
                 cursor
                 node {
@@ -64,7 +76,7 @@ class Forest::Shopify::Storefront::Products
                 hasNextPage
               }
             }
-            collections(first: 10) {
+            collections(first: 250) {
               edges {
                 cursor
                 node {
@@ -95,13 +107,13 @@ class Forest::Shopify::Storefront::Products
       products = response.data.products.edges.collect(&:node)
       product_cursor = response.data.products.edges.last.cursor
 
-      puts "[Forest][Shopify] Syncing product page index - #{page_index}" if Rails.env.development?
+      puts "[Forest][Shopify] Syncing products - page #{page_index}" if Rails.env.development?
 
       products.each do |product|
         matched_shopify_ids << product.id
 
         forest_shopify_product = Forest::Shopify::Product.find_or_initialize_by(shopify_id_base64: product.id)
-        puts "[Forest][Shopify]   #{product.title}" if Rails.env.development?
+        puts "[Forest][Shopify] -- #{product.title}" if Rails.env.development?
         forest_shopify_product.assign_attributes({
           available_for_sale: product.available_for_sale,
           shopify_created_at: DateTime.parse(product.created_at),
@@ -113,7 +125,11 @@ class Forest::Shopify::Storefront::Products
           shopify_published_at: DateTime.parse(product.published_at),
           title: product.title,
         })
-        forest_shopify_product.save
+        forest_shopify_product.save!
+
+        # TODO: handle product images
+
+        create_variants(product: product, forest_shopify_product: forest_shopify_product)
       end
 
       if has_next_page
@@ -128,6 +144,37 @@ class Forest::Shopify::Storefront::Products
     # Keep track of the last time the sync was run via a setting
     last_run_setting = Setting.find_or_initialize_by(slug: 'forest_shopify_last_sync_products')
     last_run_setting.update(value: Time.current.to_i)
+
+    true
+  end
+
+  def self.create_variants(product:, forest_shopify_product:)
+    variants = product.variants
+    variant_nodes = variants.edges.collect(&:node)
+    has_next_page = variants.page_info.has_next_page
+    page_index = 1
+
+    puts "[Forest][Shopify] ---- Syncing variants - page #{page_index}" if Rails.env.development?
+
+    variant_nodes.each do |variant|
+      forest_shopify_variant = Forest::Shopify::Variant.find_or_initialize_by(shopify_id_base64: variant.id)
+      puts "[Forest][Shopify] ------  #{variant.title}" if Rails.env.development?
+      forest_shopify_variant.assign_attributes({
+        shopify_id_base64: variant.id,
+        title: variant.title,
+        available_for_sale: variant.available_for_sale,
+        compare_at_price: variant.compare_at_price,
+        price: variant.price,
+        sku: variant.sku,
+        weight: variant.weight,
+        weight_unit: variant.weight_unit,
+        forest_shopify_product_id: forest_shopify_product.id
+      })
+      forest_shopify_variant.save!
+    end
+
+    # TODO: handle variant pagination
+    # TODO: handle variant images
 
     true
   end

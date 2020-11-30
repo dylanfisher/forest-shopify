@@ -7,6 +7,7 @@ Rails.application.routes.draw do
             post 'sync'
           end
         end
+        resources :variants
       end
     end
   end

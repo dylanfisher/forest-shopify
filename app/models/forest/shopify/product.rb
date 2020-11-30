@@ -3,6 +3,8 @@ class Forest::Shopify::Product < Forest::ApplicationRecord
 
   before_save :decode_shopify_id
 
+  has_many :variants, class_name: 'Forest::Shopify::Variant', foreign_key: 'forest_shopify_product_id', dependent: :destroy
+
   scope :available_for_sale, -> { where(available_for_sale: true) }
 
   def self.resource_description

@@ -1,0 +1,33 @@
+<%= simple_form_for([:admin, :forest, :shopify, @variant]) do |f| %>
+  <%= f.error_notification %>
+  <div class="row small-gutters">
+    <%= render 'admin/shared/edit/sidebar', f: f, record: @variant %>
+    <div class="col-md-9">
+      <div class="card">
+        <h1 class="h2 card-header"><%= record_name(@variant) %></h1>
+        <div class="card-body">
+          <div class="form-inputs">
+            <div class="row small-gutters">
+              <div class="col-md-6">
+                <%= render 'admin/form_inputs/slug', f: f %>
+                <%= f.input :title %>
+                <%= f.input :shopify_id_base64 %>
+                <%= f.input :price %>
+                <%= f.input :available_for_sale %>
+                <%= f.input :compare_at_price %>
+                <%= f.input :sku %>
+                <%= f.input :weight %>
+                <%= f.input :weight_unit %>
+                <%= f.association :product %>
+                <%= f.button :submit, class: 'btn-success d-md-none' %>
+              </div>
+              <div class="col-md-6">
+                <%= render 'admin/form_inputs/status', f: f, record: @variant %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>
