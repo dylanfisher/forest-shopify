@@ -1,14 +1,9 @@
 <% content_for :index_header_button_group do %>
+  <div class="text-muted ml-auto px-3 font-weight-normal h6 my-auto">
+    Last synced <%= time_ago_in_words Time.at(Setting.for(:forest_shopify_last_sync_products).to_i).to_datetime %> ago.
+  </div>
   <%= form_with url: sync_admin_forest_shopify_products_path, local: true do %>
     <%= submit_tag 'Sync Now', class: 'btn btn-outline-secondary' %>
-  <% end %>
-<% end %>
-
-<% if Setting.for(:forest_shopify_last_sync_products).present? %>
-  <% content_for :index_header_body do %>
-    <div class="text-muted ml-auto">
-      Last synced <%= time_ago_in_words Time.at(Setting.for(:forest_shopify_last_sync_products).to_i).to_datetime %> ago.
-    </div>
   <% end %>
 <% end %>
 

@@ -1,23 +1,27 @@
-class Forest::Shopify::Product < Forest::ApplicationRecord
-  include Sluggable
+module Forest::Shopify
+  class Product < Forest::ApplicationRecord
+    include Sluggable
 
-  before_save :decode_shopify_id
+    before_save :decode_shopify_id
 
-  has_many :variants, class_name: 'Forest::Shopify::Variant', foreign_key: 'forest_shopify_product_id', dependent: :destroy
+    has_many :variants, class_name: 'Forest::Shopify::Variant', foreign_key: 'forest_shopify_product_id', dependent: :destroy
+    has_many :images, class_name: 'Forest::Shopify::ProductImage', foreign_key: 'forest_shopify_product_id', dependent: :destroy
+    has_many :media_items, through: :images
 
-  scope :available_for_sale, -> { where(available_for_sale: true) }
+    scope :available_for_sale, -> { where(available_for_sale: true) }
 
-  def self.resource_description
-    'Products are synced automatically from Shopify.'
-  end
+    def self.resource_description
+      'Products are synced automatically from Shopify.'
+    end
 
-  def slug_attribute
-    handle
-  end
+    def slug_attribute
+      handle
+    end
 
-  private
+    private
 
-  def decode_shopify_id
-    self.shopify_id = Base64.decode64(shopify_id_base64).split('/').last if shopify_id_base64_changed?
+    def decode_shopify_id
+      self.shopify_id = Base64.decode64(shopify_id_base64).split('/').last if shopify_id_base64_changed?
+    end
   end
 end

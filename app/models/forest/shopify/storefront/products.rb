@@ -127,8 +127,7 @@ class Forest::Shopify::Storefront::Products
         })
         forest_shopify_product.save!
 
-        # TODO: handle product images
-
+        create_images(product: product, forest_shopify_product: forest_shopify_product)
         create_variants(product: product, forest_shopify_product: forest_shopify_product)
       end
 
@@ -150,14 +149,14 @@ class Forest::Shopify::Storefront::Products
 
   def self.create_variants(product:, forest_shopify_product:)
     variants = product.variants
-    variant_nodes = variants.edges.collect(&:node)
+    nodes = variants.edges.collect(&:node)
     has_next_page = variants.page_info.has_next_page
     page_index = 1
 
     puts "[Forest][Shopify] ---- Syncing variants - page #{page_index}" if Rails.env.development?
 
-    variant_nodes.each do |variant|
-      forest_shopify_variant = Forest::Shopify::Variant.find_or_initialize_by(shopify_id_base64: variant.id)
+    nodes.each do |variant|
+      forest_shopify_variant = Forest::Shopify::Variant.find_or_initialize_by({ forest_shopify_product_id: forest_shopify_product.id, shopify_id_base64: variant.id })
       puts "[Forest][Shopify] ------  #{variant.title}" if Rails.env.development?
       forest_shopify_variant.assign_attributes({
         shopify_id_base64: variant.id,
@@ -167,8 +166,7 @@ class Forest::Shopify::Storefront::Products
         price: variant.price,
         sku: variant.sku,
         weight: variant.weight,
-        weight_unit: variant.weight_unit,
-        forest_shopify_product_id: forest_shopify_product.id
+        weight_unit: variant.weight_unit
       })
       forest_shopify_variant.save!
     end
@@ -177,5 +175,34 @@ class Forest::Shopify::Storefront::Products
     # TODO: handle variant images
 
     true
+  end
+
+  def self.create_images(product:, forest_shopify_product:)
+    images = product.images
+    nodes = images.edges.collect(&:node)
+    has_next_page = images.page_info.has_next_page
+    page_index = 1
+
+    nodes.each_with_index do |image, index|
+      forest_shopify_product_image = Forest::Shopify::ProductImage.find_or_initialize_by({ forest_shopify_product_id: forest_shopify_product.id, shopify_id_base64: image.id })
+      forest_shopify_product_image.assign_attributes({
+        alt_text: image.alt_text,
+        src: image.src
+      })
+      if forest_shopify_product_image.media_item.blank?
+        media_item = MediaItem.new({
+          title: "#{forest_shopify_product.title} image #{index + 1}",
+          alternative_text: image.alt_text
+        })
+        media_item.attachment = uploader.upload(URI.open(image.src))
+        forest_shopify_product_image.media_item = media_item
+        media_item.save!
+      end
+      forest_shopify_product_image.save!
+    end
+  end
+
+  def self.uploader
+    @uploader ||= FileUploader.new(:cache)
   end
 end
