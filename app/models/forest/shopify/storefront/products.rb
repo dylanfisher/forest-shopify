@@ -107,7 +107,7 @@ class Forest::Shopify::Storefront::Products
       products = response.data.products.edges.collect(&:node)
       product_cursor = response.data.products.edges.last.cursor
 
-      puts "[Forest][Shopify] Syncing products - page #{page_index}" if Rails.env.development?
+      puts "[Forest][Shopify] Syncing products" if Rails.env.development?
 
       products.each do |product|
         matched_shopify_ids << product.id
@@ -154,7 +154,7 @@ class Forest::Shopify::Storefront::Products
     has_next_page = variants.page_info.has_next_page
     page_index = 1
 
-    puts "[Forest][Shopify] ---- Syncing variants - page #{page_index}" if Rails.env.development?
+    puts "[Forest][Shopify] ---- Syncing variants" if Rails.env.development?
 
     nodes.each do |variant|
       forest_shopify_variant = Forest::Shopify::Variant.find_or_initialize_by({ forest_shopify_product_id: forest_shopify_product.id, shopify_id_base64: variant.id })
@@ -181,7 +181,11 @@ class Forest::Shopify::Storefront::Products
 
   def self.create_images(images:, forest_shopify_record:)
     Array(images).each_with_index do |image, index|
-      forest_shopify_image = Forest::Shopify::Image.find_or_initialize_by({ forest_shopify_record_id: forest_shopify_record.id, forest_shopify_record_type: forest_shopify_record.class.name, shopify_id_base64: image.id })
+      forest_shopify_image = Forest::Shopify::Image.find_or_initialize_by({
+        forest_shopify_record_id: forest_shopify_record.id,
+        forest_shopify_record_type: forest_shopify_record.class.name,
+        shopify_id_base64: image.id
+      })
       forest_shopify_image.assign_attributes({
         alt_text: image.alt_text,
         src: image.src
@@ -189,7 +193,8 @@ class Forest::Shopify::Storefront::Products
       if forest_shopify_image.media_item.blank?
         media_item = MediaItem.new({
           title: "#{forest_shopify_record.title} image #{index + 1}",
-          alternative_text: image.alt_text
+          alternative_text: image.alt_text,
+          media_item_status: 'hidden'
         })
         media_item.attachment = uploader.upload(URI.open(image.src))
         forest_shopify_image.media_item = media_item
