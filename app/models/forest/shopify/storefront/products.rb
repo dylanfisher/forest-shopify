@@ -127,7 +127,8 @@ class Forest::Shopify::Storefront::Products
         })
         forest_shopify_product.save!
 
-        create_images(product: product, forest_shopify_product: forest_shopify_product)
+        images = product.images.edges.collect(&:node)
+        create_images(images: images, forest_shopify_record: forest_shopify_product)
         create_variants(product: product, forest_shopify_product: forest_shopify_product)
       end
 
@@ -169,36 +170,32 @@ class Forest::Shopify::Storefront::Products
         weight_unit: variant.weight_unit
       })
       forest_shopify_variant.save!
+
+      create_images(images: variant.image, forest_shopify_record: forest_shopify_variant)
     end
 
     # TODO: handle variant pagination
-    # TODO: handle variant images
 
     true
   end
 
-  def self.create_images(product:, forest_shopify_product:)
-    images = product.images
-    nodes = images.edges.collect(&:node)
-    has_next_page = images.page_info.has_next_page
-    page_index = 1
-
-    nodes.each_with_index do |image, index|
-      forest_shopify_product_image = Forest::Shopify::ProductImage.find_or_initialize_by({ forest_shopify_product_id: forest_shopify_product.id, shopify_id_base64: image.id })
-      forest_shopify_product_image.assign_attributes({
+  def self.create_images(images:, forest_shopify_record:)
+    Array(images).each_with_index do |image, index|
+      forest_shopify_image = Forest::Shopify::Image.find_or_initialize_by({ forest_shopify_record_id: forest_shopify_record.id, forest_shopify_record_type: forest_shopify_record.class.name, shopify_id_base64: image.id })
+      forest_shopify_image.assign_attributes({
         alt_text: image.alt_text,
         src: image.src
       })
-      if forest_shopify_product_image.media_item.blank?
+      if forest_shopify_image.media_item.blank?
         media_item = MediaItem.new({
-          title: "#{forest_shopify_product.title} image #{index + 1}",
+          title: "#{forest_shopify_record.title} image #{index + 1}",
           alternative_text: image.alt_text
         })
         media_item.attachment = uploader.upload(URI.open(image.src))
-        forest_shopify_product_image.media_item = media_item
+        forest_shopify_image.media_item = media_item
         media_item.save!
       end
-      forest_shopify_product_image.save!
+      forest_shopify_image.save!
     end
   end
 

@@ -24,6 +24,7 @@
               </div>
               <div class="col-md-6">
                 <%= render 'admin/form_inputs/status', f: f, record: @product %>
+                <%= image_tag @product.featured_media_item.attachment_url(:medium) if @product.featured_media_item.present? %>
               </div>
               <%# TODO: show variants %>
             </div>

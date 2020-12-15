@@ -7,9 +7,10 @@
         <% if Forest::Shopify::Variant.statusable? %>
           <th></th>
         <% end %>
+        <th></th>
         <th><%= table_sorter title: 'ID', path: :admin_forest_shopify_variants_path, scope: :by_id, default_order: :desc %></th>
-        <th><%= table_sorter title: 'Slug', path: :admin_forest_shopify_variants_path, scope: :by_slug, default_order: :asc %></th>
-        <th>Title</th>
+        <th>Product Title</th>
+        <th>Variant Title</th>
         <th>Price</th>
         <th>Available For Sale</th>
         <th><%= table_sorter title: 'Created&nbsp;at'.html_safe, path: :admin_forest_shopify_variants_path, scope: :by_created_at, default_order: :desc %></th>
@@ -19,15 +20,16 @@
     </thead>
 
     <tbody>
-      <% @variants.each do |variant| %>
+      <% @variants.includes(:product, :media_item).each do |variant| %>
         <tr>
           <% if Forest::Shopify::Variant.statusable? %>
             <td><%= status_indicator variant %></td>
           <% end %>
+          <td><%= table_thumbnail(variant.media_item) %></td>
           <td><%= variant.id %></td>
-          <td><%= variant.slug %></td>
+          <td><%= variant.product.title %></td>
           <td><%= variant.title %></td>
-          <td><%= variant.price %></td>
+          <td><%= number_to_currency(variant.price) %></td>
           <td><%= variant.available_for_sale %></td>
           <td><%= forest_date variant.created_at %></td>
           <td><%= forest_date variant.updated_at %></td>

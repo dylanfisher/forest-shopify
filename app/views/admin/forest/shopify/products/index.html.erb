@@ -16,8 +16,8 @@
         <% if Forest::Shopify::Product.statusable? %>
           <th></th>
         <% end %>
+        <th></th>
         <th><%= table_sorter title: 'ID', path: :admin_forest_shopify_products_path, scope: :by_id, default_order: :desc %></th>
-        <th><%= table_sorter title: 'Slug', path: :admin_forest_shopify_products_path, scope: :by_slug, default_order: :asc %></th>
         <th>Title</th>
         <th>Handle</th>
         <th>Shopify ID</th>
@@ -29,13 +29,13 @@
     </thead>
 
     <tbody>
-      <% @products.each do |product| %>
+      <% @products.includes(:featured_media_item).each do |product| %>
         <tr>
           <% if Forest::Shopify::Product.statusable? %>
             <td><%= status_indicator product %></td>
           <% end %>
+          <td><%= table_thumbnail(product.featured_media_item) %></td>
           <td><%= product.id %></td>
-          <td><%= product.slug %></td>
           <td><%= product.title %></td>
           <td><%= product.handle %></td>
           <td><%= product.shopify_id %></td>
