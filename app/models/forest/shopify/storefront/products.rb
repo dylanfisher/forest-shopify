@@ -141,9 +141,13 @@ class Forest::Shopify::Storefront::Products
     # Delete unmatched forest shopify products
     Forest::Shopify::Product.where.not(shopify_id_base64: matched_shopify_ids).destroy_all
 
-    # Keep track of the last time the sync was run via a setting
-    last_run_setting = Setting.find_or_initialize_by(slug: 'forest_shopify_last_sync_products')
-    last_run_setting.update(value: Time.current.to_i)
+    # TODO: this won't work with the current implementation of settings, which don't play nicely with the I18n import
+    # # Keep track of the last time the sync was run via a setting
+    # last_run_setting = Setting.find_or_initialize_by(slug: 'forest_shopify_last_sync_products')
+    # last_run_setting.assign_attributes({
+    #   value: Time.current.to_i
+    # })
+    # last_run_setting.save!
 
     true
   end
