@@ -56,7 +56,7 @@ class Admin::Forest::Shopify::ProductsController < Admin::ForestController
 
   def product_params
     # Add blockable params to the permitted attributes if this record is blockable `**BlockSlot.blockable_params`
-    params.require(:product).permit(:slug, :status, :available_for_sale, :shopify_created_at, :description, :description_html, :handle, :shopify_id, :shopify_id_base64, :product_type, :shopify_published_at, :title)
+    params.require(:product).permit(:slug, :status, :available_for_sale, :shopify_created_at, :description, :description_html, :handle, :shopify_id, :shopify_id_base64, :product_type, :shopify_published_at, :title, **BlockSlot.blockable_params)
   end
 
   def set_product

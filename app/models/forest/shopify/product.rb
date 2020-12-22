@@ -1,6 +1,8 @@
 module Forest::Shopify
   class Product < Forest::ApplicationRecord
+    include Blockable
     include Sluggable
+    include Statusable
 
     before_save :decode_shopify_id
 
