@@ -112,6 +112,8 @@ class Forest::Shopify::Storefront::Products
       products.each do |product|
         matched_shopify_ids << product.id
 
+        # TODO: do we need to check the product/variant position field?
+
         forest_shopify_product = Forest::Shopify::Product.find_or_initialize_by(shopify_id_base64: product.id)
         puts "[Forest][Shopify] -- #{product.title}" if Rails.env.development?
         forest_shopify_product.assign_attributes({

@@ -10,7 +10,7 @@ module Forest::Shopify
     has_many :images, as: :forest_shopify_record, dependent: :destroy
     has_many :media_items, through: :images
 
-    has_one :featured_image, -> { order(id: :asc) }, class_name: 'Forest::Shopify::Image', foreign_key: :forest_shopify_record_id
+    has_one :featured_image, -> { order(id: :asc) }, as: :forest_shopify_record, class_name: 'Forest::Shopify::Image'
     has_one :featured_media_item, through: :featured_image, source: :media_item
 
     scope :available_for_sale, -> { where(available_for_sale: true) }
