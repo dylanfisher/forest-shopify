@@ -17,6 +17,20 @@ Forest Shopify adds the following resources to the Forest CMS dashboard.
 Forest Shopify syncs products server-side using GitHub's `graphql-client` library. This code is namespaced
 in the `Forest::Shopify::Storefront` class.
 
+## Webhooks
+Configure your application to listen for webhooks configured in Shopify that notify and update products without
+waiting for the sync task to run.
+
+Add webhook shared secret to Rails credentials.
+
+`shopify_webhook_key`
+
+In Shopify, configure the following webhook events and URLS in JSON format.
+
+- `Product create` -> `https://my-app.com/forest/shopify/webhooks/products/create`
+- `Product update` -> `https://my-app.com/forest/shopify/webhooks/products/update`
+- `Product destroy` -> `https://my-app.com/forest/shopify/webhooks/products/destroy`
+
 ## Installation
 Add this line to your application's Gemfile:
 
