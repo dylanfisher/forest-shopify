@@ -4,7 +4,7 @@ Sync a Shopify store with a Rails application running Forest CMS.
 ## Rake tasks
 Sync all Shopify storefront API endpoints. Run this in a cron job to keep your store up to date with Shopify.
 
-`rails forest:shopify:sync_all`
+`rails forest:shopify:sync`
 
 ## Forest CMS Resources
 Forest Shopify adds the following resources to the Forest CMS dashboard.

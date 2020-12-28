@@ -107,7 +107,7 @@ class Forest::Shopify::Storefront::Products
       products = response.data.products.edges.collect(&:node)
       product_cursor = response.data.products.edges.last.cursor
 
-      puts "[Forest][Shopify] Syncing products" if Rails.env.development?
+      puts "[Forest][Shopify] Syncing Products" if Rails.env.development?
 
       products.each do |product|
         matched_shopify_ids << product.id
@@ -158,11 +158,9 @@ class Forest::Shopify::Storefront::Products
     has_next_page = variants.page_info.has_next_page
     page_index = 1
 
-    puts "[Forest][Shopify] ---- Syncing variants" if Rails.env.development?
-
     nodes.each do |variant|
       forest_shopify_variant = Forest::Shopify::Variant.find_or_initialize_by({ forest_shopify_product_id: forest_shopify_product.id, shopify_id_base64: variant.id })
-      puts "[Forest][Shopify] ------  #{variant.title}" if Rails.env.development?
+      puts "[Forest][Shopify] ----  #{variant.title}" if Rails.env.development?
       forest_shopify_variant.assign_attributes({
         shopify_id_base64: variant.id,
         title: variant.title,

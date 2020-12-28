@@ -1,7 +1,7 @@
 namespace :forest do
   namespace :shopify do
     desc 'Sync all Shopify storefront API endpoints.'
-    task :sync_all => :environment do
+    task :sync => :environment do
       begin
         Forest::Shopify::Storefront::Products.sync
       rescue Exception => e
