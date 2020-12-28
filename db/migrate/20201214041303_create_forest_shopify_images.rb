@@ -1,4 +1,4 @@
-class CreateForestShopifyImages < ActiveRecord::Migration[6.1]
+class CreateForestShopifyImages < ActiveRecord::Migration[6.0]
   def change
     create_table :forest_shopify_images do |t|
       t.references :forest_shopify_record, polymorphic: true
