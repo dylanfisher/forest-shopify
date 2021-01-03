@@ -1,8 +1,8 @@
-class Forest::Shopify::Storefront::Products
-  # Forest::Shopify::Storefront::Client.query(Forest::Shopify::Storefront::Products::Query)
-  # Forest::Shopify::Storefront::Products.sync
+class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
+  # Forest::Shopify::Storefront::Client.query(Forest::Shopify::Storefront::Product::Query)
+  # Forest::Shopify::Storefront::Product.sync
 
-  Query = Forest::Shopify::Storefront::Client.parse <<-'GRAPHQL'
+  Query = Client.parse <<-'GRAPHQL'
     query($after: String) {
       products(first: 250, after: $after) {
         pageInfo {
@@ -97,7 +97,7 @@ class Forest::Shopify::Storefront::Products
   GRAPHQL
 
   def self.sync
-    response = Forest::Shopify::Storefront::Client.query(Query)
+    response = Client.query(Query)
     has_next_page = response.data.products.page_info.has_next_page
     matched_shopify_ids = []
     page_index = 0
@@ -135,7 +135,7 @@ class Forest::Shopify::Storefront::Products
       end
 
       if has_next_page
-        response = Forest::Shopify::Storefront::Client.query(Query, variables: { after: product_cursor })
+        response = Client.query(Query, variables: { after: product_cursor })
         has_next_page = response.data.products.page_info.has_next_page
       end
     end
@@ -206,9 +206,5 @@ class Forest::Shopify::Storefront::Products
       end
       forest_shopify_image.save!
     end
-  end
-
-  def self.uploader
-    @uploader ||= FileUploader.new(:cache)
   end
 end

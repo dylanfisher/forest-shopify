@@ -1,0 +1,35 @@
+<%= simple_form_for([:admin, :forest, :shopify, @collection]) do |f| %>
+  <%= f.error_notification %>
+  <div class="row small-gutters">
+    <%= render 'admin/shared/edit/sidebar', f: f, record: @collection %>
+    <div class="col-md-9">
+      <div class="card">
+        <h1 class="h2 card-header"><%= record_name(@collection) %></h1>
+        <div class="card-body">
+          <div class="form-inputs">
+            <div class="row small-gutters">
+              <div class="col-md-6">
+                <%= render 'admin/form_inputs/slug', f: f %>
+                <%= f.input :description %>
+                <%= f.input :description_html %>
+                <%= f.input :handle %>
+                <%= f.input :shopify_id, label: 'Shopify ID' %>
+                <%= f.input :shopify_id_base64, label: 'Shopify ID (base64 encoded)' %>
+                <%= f.input :shopify_updated_at, as: :datepicker %>
+                <%= f.input :title %>
+                <%= f.input :slug %>
+                <%= f.button :submit, class: 'btn-success d-md-none' %>
+              </div>
+              <div class="col-md-6">
+                <%= render 'admin/form_inputs/status', f: f, record: @collection %>
+                <%= image_tag @collection.media_item.attachment_url(:medium) if @collection.media_item.present? %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <%# Uncomment the following partial if the record is blockable. Optionally pass the block_layout or block_kinds to the partial. %>
+      <%= render 'admin/block_record/block_layout', f: f, block_layout: @block_layout, block_kinds: @block_kinds %>
+    </div>
+  </div>
+<% end %>

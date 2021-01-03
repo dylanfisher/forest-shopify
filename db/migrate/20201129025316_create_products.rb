@@ -18,6 +18,8 @@ class CreateProducts < ActiveRecord::Migration[6.0]
       t.timestamps
     end
     add_index :forest_shopify_products, :slug, unique: true
+    add_index :forest_shopify_products, :status
+    add_index :forest_shopify_products, :blockable_metadata, using: :gin
     add_index :forest_shopify_products, :shopify_id
     add_index :forest_shopify_products, :shopify_id_base64
     add_index :forest_shopify_products, :available_for_sale

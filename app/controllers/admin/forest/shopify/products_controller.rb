@@ -43,7 +43,7 @@ class Admin::Forest::Shopify::ProductsController < Admin::ForestController
 
   def sync
     # TODO: move to a background job
-    if Forest::Shopify::Storefront::Products.sync
+    if Forest::Shopify::Storefront::Product.sync
       notice = 'Products were successfully synced.'
     else
       notice = 'Products failed to sync.'

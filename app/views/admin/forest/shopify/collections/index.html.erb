@@ -1,0 +1,56 @@
+<%= render 'admin/headers/index', records: @collections, model_name: 'Forest::Shopify::Collection' %>
+
+<div class="table-responsive">
+  <table class="forest-table table table-striped table-sm">
+    <thead>
+      <tr>
+        <% if Forest::Shopify::Collection.statusable? %>
+          <th></th>
+        <% end %>
+        <th></th>
+        <th><%= table_sorter title: 'ID', path: :admin_forest_shopify_collections_path, scope: :by_id, default_order: :desc %></th>
+        <th>Title</th>
+        <th>Handle</th>
+        <th>Shopify Id</th>
+        <th><%= table_sorter title: 'Created&nbsp;at'.html_safe, path: :admin_forest_shopify_collections_path, scope: :by_created_at, default_order: :desc %></th>
+        <th><%= table_sorter title: 'Updated&nbsp;at'.html_safe, path: :admin_forest_shopify_collections_path, scope: :by_updated_at, default_order: :desc %></th>
+        <th colspan="3"></th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <% @collections.each do |collection| %>
+        <tr>
+          <% if Forest::Shopify::Collection.statusable? %>
+            <td><%= status_indicator collection %></td>
+          <% end %>
+          <td><%= table_thumbnail(collection.media_item) %></td>
+          <td><%= collection.id %></td>
+          <td><%= collection.title %></td>
+          <td><%= collection.handle %></td>
+          <td><%= collection.shopify_id %></td>
+          <td><%= forest_date collection.created_at %></td>
+          <td><%= forest_date collection.updated_at %></td>
+          <td width="1">
+            <%= link_to 'Edit', edit_admin_forest_shopify_collection_path(collection), class: 'btn btn-xs btn-primary', role: 'button' %>
+          </td>
+          <% if try('collection_path', collection) %>
+            <% if collection.respond_to?(:to_friendly_param) %>
+              <% param = collection.to_friendly_param %>
+            <% else %>
+              <% param = collection %>
+            <% end %>
+            <td width="1">
+              <%= link_to 'Show', collection_path(param), class: 'btn btn-xs btn-info', role: 'button', data: { turbolinks: false } %>
+            </td>
+          <% end %>
+          <td width="1">
+            <%= link_to 'Destroy', [:admin, :forest, :shopify, collection], method: :delete, class: 'btn btn-xs btn-danger', role: 'button', data: { confirm: 'Are you sure you want to destroy this Collection?' } %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+
+<%= pagy_bootstrap_nav_js(@pagy).html_safe if @pagy.pages > 1 %>

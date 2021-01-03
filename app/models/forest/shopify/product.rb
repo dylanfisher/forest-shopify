@@ -7,6 +7,10 @@ module Forest::Shopify
     before_save :decode_shopify_id
 
     has_many :variants, class_name: 'Forest::Shopify::Variant', foreign_key: 'forest_shopify_product_id', dependent: :destroy
+
+    has_many :collection_products, class_name: 'Forest::Shopify::CollectionProduct', foreign_key: 'forest_shopify_product_id', dependent: :destroy
+    has_many :collections, through: :collection_products, source: :forest_shopify_collection, class_name: 'Forest::Shopify::Collection'
+
     has_many :images, as: :forest_shopify_record, dependent: :destroy
     has_many :media_items, through: :images
 
@@ -16,7 +20,7 @@ module Forest::Shopify
     scope :available_for_sale, -> { where(available_for_sale: true) }
 
     def self.resource_description
-      'Products are synced automatically from Shopify.'
+      'Products are created and managed in Shopify and sync automatically to Forest.'
     end
 
     def slug_attribute

@@ -37,4 +37,37 @@ class Forest::Shopify::Storefront
   Schema = GraphQL::Client.load_schema(schema_file)
 
   Client = GraphQL::Client.new(schema: Schema, execute: HTTP)
+
+  def self.create_images(images:, forest_shopify_record:)
+    Array(images).each_with_index do |image, index|
+      forest_shopify_image = Forest::Shopify::Image.find_or_initialize_by({
+        forest_shopify_record_id: forest_shopify_record.id,
+        forest_shopify_record_type: forest_shopify_record.class.name,
+        shopify_id_base64: image.id
+      })
+
+      forest_shopify_image.assign_attributes({
+        alt_text: image.alt_text,
+        src: image.src
+      })
+
+      if forest_shopify_image.media_item.blank?
+        media_item = MediaItem.new({
+          title: "#{forest_shopify_record.title} image #{index + 1}",
+          alternative_text: image.alt_text,
+          media_item_status: 'hidden'
+        })
+
+        media_item.attachment = uploader.upload(URI.open(image.src))
+        forest_shopify_image.media_item = media_item
+        media_item.save!
+      end
+
+      forest_shopify_image.save!
+    end
+  end
+
+  def self.uploader
+    @uploader ||= FileUploader.new(:cache)
+  end
 end

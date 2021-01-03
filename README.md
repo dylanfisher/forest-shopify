@@ -13,6 +13,14 @@ Forest Shopify adds the following resources to the Forest CMS dashboard.
 
 `Forest::Shopify::Variant`
 
+Add the Forest Shopify resources to your host app's dashboard panel:
+
+```
+<%= render 'admin/dashboard/forest_shopify_panel',
+           title: 'Products',
+           resources: [Forest::Shopify::Product, Forest::Shopify::Variant, Forest::Shopify::Collection] %>
+```
+
 ## GraphQL Client Syncing
 Forest Shopify syncs products server-side using GitHub's `graphql-client` library. This code is namespaced
 in the `Forest::Shopify::Storefront` class.
