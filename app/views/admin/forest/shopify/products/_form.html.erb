@@ -24,7 +24,26 @@
               </div>
               <div class="col-md-6">
                 <%= render 'admin/form_inputs/status', f: f, record: @product %>
-                <%= image_tag @product.featured_media_item.attachment_url(:medium) if @product.featured_media_item.present? %>
+                <% if @product.media_items.present? %>
+                  <label>Images</label>
+                  <div class="row small-gutters">
+                    <% @product.media_items.each do |media_item| %>
+                      <div class="col-6 mb-3">
+                        <%= link_to image_tag(media_item.attachment_url(:medium)), media_item.attachment_url, class: 'blank-link', target: '_blank' %>
+                      </div>
+                    <% end %>
+                  </div>
+                <% end %>
+                <% if @product.collections.present? %>
+                  <label>Collections</label>
+                  <ul>
+                    <% @product.collections.each do |collection| %>
+                      <li>
+                        <%= link_to collection.title, edit_admin_forest_shopify_collection_path(collection) %>
+                      </li>
+                    <% end %>
+                  </ul>
+                <% end %>
               </div>
               <%# TODO: show variants %>
             </div>

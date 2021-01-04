@@ -59,6 +59,7 @@ $ gem install forest-shopify
 ## TODO
 - Add additional sync and webhooks for the following resources
   - Product Collections
+- Better logic for determining price of product with no variants; show this in the index and edit views
 - Determine if discounts are reflected in the current API calls
 - Listen to webhooks to avoid potential of stale data using just a sync task via cron job
 - Document frontend javascript examples of how to interact with the store via the `js-buy-sdk` library.

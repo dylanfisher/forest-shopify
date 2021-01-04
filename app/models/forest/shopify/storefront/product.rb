@@ -130,6 +130,8 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
         forest_shopify_product.save!
 
         images = product.images.edges.collect(&:node)
+        # Delete obsolete images that no longer exist in Shopify
+        forest_shopify_product.images.where.not(shopify_id_base64: images.collect(&:id)).destroy_all
         create_images(images: images, forest_shopify_record: forest_shopify_product)
         create_variants(product: product, forest_shopify_product: forest_shopify_product)
       end

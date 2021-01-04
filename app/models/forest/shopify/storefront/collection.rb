@@ -72,7 +72,7 @@ class Forest::Shopify::Storefront::Collection < Forest::Shopify::Storefront
 
         # TODO: handle collection product pagination
         collection_product_ids = collection.products.edges.collect(&:node).collect(&:id)
-        forest_shopify_collection.products << Forest::Shopify::Product.where(shopify_id_base64: collection_product_ids).where.not(shopify_id_base64: forest_shopify_collection.products.pluck(:shopify_id_base64))
+        forest_shopify_collection.products = Forest::Shopify::Product.where(shopify_id_base64: collection_product_ids)
 
         create_images(images: collection.image, forest_shopify_record: forest_shopify_collection)
       end
