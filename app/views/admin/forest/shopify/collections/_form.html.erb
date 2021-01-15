@@ -10,14 +10,13 @@
             <div class="row small-gutters">
               <div class="col-md-6">
                 <%= render 'admin/form_inputs/slug', f: f %>
-                <%= f.input :description %>
-                <%= f.input :description_html %>
-                <%= f.input :handle %>
-                <%= f.input :shopify_id, label: 'Shopify ID' %>
-                <%= f.input :shopify_id_base64, label: 'Shopify ID (base64 encoded)' %>
-                <%= f.input :shopify_updated_at, as: :datepicker %>
-                <%= f.input :title %>
-                <%= f.input :slug %>
+                <%= f.input :description, disabled: true %>
+                <%= f.input :description_html, disabled: true %>
+                <%= f.input :handle, disabled: true %>
+                <%= f.input :shopify_id, label: 'Shopify ID', disabled: true %>
+                <%= f.input :shopify_id_base64, label: 'Shopify ID (base64 encoded)', disabled: true %>
+                <%= f.input :shopify_updated_at, as: :datepicker, disabled: true %>
+                <%= f.input :title, disabled: true %>
                 <%= f.button :submit, class: 'btn-success d-md-none' %>
               </div>
               <div class="col-md-6">
