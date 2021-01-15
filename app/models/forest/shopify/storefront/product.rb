@@ -2,7 +2,91 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
   # Forest::Shopify::Storefront::Client.query(Forest::Shopify::Storefront::Product::Query)
   # Forest::Shopify::Storefront::Product.sync
 
-  Query = Client.parse <<-'GRAPHQL'
+  PRODUCT_NODE = <<-'GRAPHQL'
+    {
+      availableForSale
+      createdAt
+      description
+      descriptionHtml
+      handle
+      id
+      productType
+      publishedAt
+      title
+      variants(first: 250) {
+        edges {
+          cursor
+          node {
+            availableForSale
+            compareAtPrice
+            id
+            price
+            sku
+            title
+            weight
+            weightUnit
+            image {
+              altText
+              id
+              src
+            }
+          }
+        }
+        pageInfo {
+          hasNextPage
+        }
+      }
+      images(first: 250) {
+        edges {
+          node {
+            altText
+            id
+            src
+          }
+        }
+        pageInfo {
+          hasNextPage
+        }
+      }
+      options(first: 250) {
+        id
+        name
+        values
+      }
+      metafields(first: 250) {
+        edges {
+          cursor
+          node {
+            description
+            id
+            key
+            namespace
+            value
+            valueType
+          }
+        }
+        pageInfo {
+          hasNextPage
+        }
+      }
+      collections(first: 250) {
+        edges {
+          cursor
+          node {
+            id
+            title
+            description
+            handle
+          }
+        }
+        pageInfo {
+          hasNextPage
+        }
+      }
+    }
+  GRAPHQL
+
+  Query = Client.parse <<-"GRAPHQL"
     query($after: String) {
       products(first: 250, after: $after) {
         pageInfo {
@@ -10,102 +94,41 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
         }
         edges {
           cursor
-          node {
-            availableForSale
-            createdAt
-            description
-            descriptionHtml
-            handle
-            id
-            productType
-            publishedAt
-            title
-            variants(first: 250) {
-              edges {
-                cursor
-                node {
-                  availableForSale
-                  compareAtPrice
-                  id
-                  price
-                  sku
-                  title
-                  weight
-                  weightUnit
-                  image {
-                    altText
-                    id
-                    src
-                  }
-                }
-              }
-              pageInfo {
-                hasNextPage
-              }
-            }
-            images(first: 250) {
-              edges {
-                node {
-                  altText
-                  id
-                  src
-                }
-              }
-              pageInfo {
-                hasNextPage
-              }
-            }
-            options(first: 250) {
-              id
-              name
-              values
-            }
-            metafields(first: 250) {
-              edges {
-                cursor
-                node {
-                  description
-                  id
-                  key
-                  namespace
-                  value
-                  valueType
-                }
-              }
-              pageInfo {
-                hasNextPage
-              }
-            }
-            collections(first: 250) {
-              edges {
-                cursor
-                node {
-                  id
-                  title
-                  description
-                  handle
-                }
-              }
-              pageInfo {
-                hasNextPage
-              }
-            }
-          }
+          node #{PRODUCT_NODE}
         }
       }
     }
   GRAPHQL
 
-  def self.sync
-    response = Client.query(Query)
-    has_next_page = response.data.products.page_info.has_next_page
+  Query_Single = Client.parse <<-"GRAPHQL"
+    query($id: ID!) {
+      node(id: $id) {
+        ... on Product #{PRODUCT_NODE}
+      }
+    }
+  GRAPHQL
+
+  def self.sync(product_id = nil)
+    if product_id.present?
+      response = Client.query(Query_Single, variables: { id: product_id })
+      has_next_page = false
+    else
+      response = Client.query(Query)
+      has_next_page = response.data.products.page_info.has_next_page
+    end
+
     matched_shopify_ids = []
     page_index = 0
 
     while has_next_page || page_index.zero?
       page_index += 1
-      products = response.data.products.edges.collect(&:node)
-      product_cursor = response.data.products.edges.last.cursor
+
+      if product_id.present?
+        products = Array(response.data.node)
+      else
+        products = response.data.products.edges.collect(&:node)
+        product_cursor = response.data.products.edges.last.cursor
+      end
 
       puts "[Forest][Shopify] Syncing Products" if Rails.env.development?
 
@@ -143,7 +166,11 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
     end
 
     # Delete unmatched forest shopify products
-    Forest::Shopify::Product.where.not(shopify_id_base64: matched_shopify_ids).destroy_all
+    # Forest::Shopify::Product.where.not(shopify_id_base64: matched_shopify_ids).destroy_all
+    unless product_id.present?
+      # TODO: Update all unmatched products to set shopify status to deleted
+      Forest::Shopify::Product.where.not(shopify_id_base64: matched_shopify_ids).update_all(status: 'hidden')
+    end
 
     # TODO: this won't work with the current implementation of settings, which don't play nicely with the I18n import
     # # Keep track of the last time the sync was run via a setting

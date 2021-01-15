@@ -2,22 +2,23 @@ module Forest
   module Shopify
     module Webhooks
       class ProductsController < WebhooksController
-        before_action :set_product
+        before_action :set_shopify_id_base64, only: [:create, :update]
+        before_action :set_product, only: [:updated, :destroy]
 
         def create
-          # TODO: create new product
+          Forest::Shopify::Storefront::Product.sync(@shopify_id_base64)
+
           head :ok
         end
 
         def update
-          # TODO: update the product
-          @product.touch
+          Forest::Shopify::Storefront::Product.sync(@shopify_id_base64)
 
           head :ok
         end
 
         def destroy
-          @product.destroy
+          @product.destroy if @product.present?
 
           head :ok
         end
@@ -26,6 +27,10 @@ module Forest
 
         def set_product
           @product = Forest::Shopify::Product.find_by_shopify_id(params[:id])
+        end
+
+        def set_shopify_id_base64
+          @shopify_id_base64 = Base64.encode64(params[:admin_graphql_api_id]).squish
         end
       end
     end
