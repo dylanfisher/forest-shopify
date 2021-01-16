@@ -30,6 +30,10 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
               id
               src
             }
+            selectedOptions {
+              name
+              value
+            }
           }
         }
         pageInfo {
@@ -63,20 +67,6 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
             namespace
             value
             valueType
-          }
-        }
-        pageInfo {
-          hasNextPage
-        }
-      }
-      collections(first: 250) {
-        edges {
-          cursor
-          node {
-            id
-            title
-            description
-            handle
           }
         }
         pageInfo {
@@ -127,7 +117,7 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
         products = Array(response.data.node)
       else
         products = response.data.products.edges.collect(&:node)
-        product_cursor = response.data.products.edges.last.cursor
+        product_cursor = response.data.products.edges.last.try(:cursor)
       end
 
       puts "[Forest][Shopify] Syncing Products" if Rails.env.development?
@@ -153,10 +143,15 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
         forest_shopify_product.save!
 
         images = product.images.edges.collect(&:node)
-        # Delete obsolete images that no longer exist in Shopify
+
+        # Delete obsolete records that no longer exist in Shopify
         forest_shopify_product.images.where.not(shopify_id_base64: images.collect(&:id)).destroy_all
+        forest_shopify_product.variants.where.not(shopify_id_base64: product.variants.edges.collect(&:node).collect(&:id)).destroy_all
+        forest_shopify_product.product_options.where.not(shopify_id_base64: product.options.collect(&:id)).destroy_all
+
         create_images(images: images, forest_shopify_record: forest_shopify_product)
         create_variants(product: product, forest_shopify_product: forest_shopify_product)
+        create_product_options(product_options: product.options, forest_shopify_record: forest_shopify_product)
       end
 
       if has_next_page
@@ -190,7 +185,14 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
     page_index = 1
 
     nodes.each do |variant|
-      forest_shopify_variant = Forest::Shopify::Variant.find_or_initialize_by({ forest_shopify_product_id: forest_shopify_product.id, shopify_id_base64: variant.id })
+      forest_shopify_variant = Forest::Shopify::Variant.find_or_initialize_by({
+        forest_shopify_product_id: forest_shopify_product.id,
+        shopify_id_base64: variant.id
+      })
+
+      selected_options = {}
+      variant.selected_options.each { |so| selected_options[so.name] = so.value }
+
       puts "[Forest][Shopify] ----  #{variant.title}" if Rails.env.development?
       forest_shopify_variant.assign_attributes({
         shopify_id_base64: variant.id,
@@ -198,6 +200,7 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
         available_for_sale: variant.available_for_sale,
         compare_at_price: variant.compare_at_price,
         price: variant.price,
+        selected_options: selected_options,
         sku: variant.sku,
         weight: variant.weight,
         weight_unit: variant.weight_unit
@@ -234,6 +237,20 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
         media_item.save!
       end
       forest_shopify_image.save!
+    end
+  end
+
+  def self.create_product_options(product_options:, forest_shopify_record:)
+    Array(product_options).each do |product_option|
+      forest_shopify_product_option = Forest::Shopify::ProductOption.find_or_initialize_by({
+        forest_shopify_product_id: forest_shopify_record.id,
+        shopify_id_base64: product_option.id
+      })
+      forest_shopify_product_option.assign_attributes({
+        name: product_option.name,
+        values: product_option.values.to_a
+      })
+      forest_shopify_product_option.save!
     end
   end
 end

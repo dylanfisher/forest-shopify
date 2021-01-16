@@ -1,5 +1,5 @@
 module Forest::Shopify
-  class Collection < Forest::ApplicationRecord
+  class Collection < Forest::Shopify::ApplicationRecord
     include Blockable
     include Sluggable
     include Statusable

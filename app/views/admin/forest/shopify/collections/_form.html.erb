@@ -22,6 +22,16 @@
               <div class="col-md-6">
                 <%= render 'admin/form_inputs/status', f: f, record: @collection %>
                 <%= image_tag @collection.media_item.attachment_url(:medium) if @collection.media_item.present? %>
+                <% if @collection.products.present? %>
+                  <label>Products</label>
+                  <ul>
+                    <% @collection.products.each do |product| %>
+                      <li>
+                        <%= link_to product.title, edit_admin_forest_shopify_product_path(product) %>
+                      </li>
+                    <% end %>
+                  </ul>
+                <% end %>
               </div>
             </div>
           </div>

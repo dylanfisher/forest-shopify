@@ -30,6 +30,16 @@
                     </li>
                   </ul>
                 <% end %>
+                <% if @variant.selected_options.present? && @variant.selected_options.try(:each) %>
+                  <label>Selected Options</label>
+                  <ul>
+                    <% @variant.selected_options.each do |selected_option_name, selected_option_value| %>
+                      <li>
+                        <%= selected_option_name %>: <%= selected_option_value %>
+                      </li>
+                    <% end %>
+                  </ul>
+                <% end %>
               </div>
             </div>
           </div>

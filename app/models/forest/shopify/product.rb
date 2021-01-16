@@ -1,10 +1,12 @@
 module Forest::Shopify
-  class Product < Forest::ApplicationRecord
+  class Product < Forest::Shopify::ApplicationRecord
     include Blockable
     include Sluggable
     include Statusable
 
     has_many :variants, class_name: 'Forest::Shopify::Variant', foreign_key: 'forest_shopify_product_id', dependent: :destroy
+
+    has_many :product_options, class_name: 'Forest::Shopify::ProductOption', foreign_key: 'forest_shopify_product_id', dependent: :destroy
 
     has_many :collection_products, class_name: 'Forest::Shopify::CollectionProduct', foreign_key: 'forest_shopify_product_id', dependent: :destroy
     has_many :collections, through: :collection_products, source: :forest_shopify_collection, class_name: 'Forest::Shopify::Collection'

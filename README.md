@@ -21,14 +21,16 @@ public access token used to make unathenticated public API requests - the same t
 ## Rake tasks
 Sync all Shopify storefront API endpoints. Run this in a cron job to keep your store up to date with Shopify.
 
-`rails forest:shopify:sync`
+- `rails forest:shopify:sync` -> Sync all Shopify storefront API endpoints.
+- `rails forest:shopify:sync_products` -> Sync Shopify products and variants.
+- `rails forest:shopify:sync_collections` -> Sync Shopify collections.
 
 ## Forest CMS Resources
 Forest Shopify adds the following resources to the Forest CMS dashboard.
 
-`Forest::Shopify::Product`
-
-`Forest::Shopify::Variant`
+- `Forest::Shopify::Product`
+- `Forest::Shopify::Variant`
+- `Forest::Shopify::Collection`
 
 Add the Forest Shopify resources to your host app's dashboard panel:
 
@@ -56,17 +58,12 @@ In Shopify, configure the following webhook events and URLS in JSON format.
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'forest-shopify'
+gem 'forest-shopify', git: 'https://github.com/dylanfisher/forest-shopify.git'
 ```
 
 And then execute:
 ```bash
 $ bundle
-```
-
-Or install it yourself as:
-```bash
-$ gem install forest-shopify
 ```
 
 ## TODO
@@ -77,13 +74,10 @@ $ gem install forest-shopify
 - Listen to webhooks to avoid potential of stale data using just a sync task via cron job
 - Document frontend javascript examples of how to interact with the store via the `js-buy-sdk` library.
 - Analytics compatible with Shopify (Google, FB Pixel, etc.)
-- Missing product fields (double check these exists in graphql request first)
-    - status
-- Missing variant fields (double check these exists in graphql request first)
-    - position
-    - option1
-    - option2
-    - option3
+- Missing product/variant fields
+  - metafields
+  - SelectedOptions on a variant?
+  - Tags?
 
 ## License
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
