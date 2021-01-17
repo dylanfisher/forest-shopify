@@ -2,7 +2,7 @@ class Admin::Forest::Shopify::VariantsController < Admin::ForestController
   before_action :set_variant, only: [:edit, :update, :destroy]
 
   def index
-    @pagy, @variants = pagy apply_scopes(Forest::Shopify::Variant.by_id)
+    @pagy, @variants = pagy apply_scopes(Forest::Shopify::Variant.by_slug)
   end
 
   def new

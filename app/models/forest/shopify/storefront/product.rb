@@ -98,9 +98,9 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
     }
   GRAPHQL
 
-  def self.sync(product_id = nil)
-    if product_id.present?
-      response = Client.query(Query_Single, variables: { id: product_id })
+  def self.sync(shopify_id_base64: nil)
+    if shopify_id_base64.present?
+      response = Client.query(Query_Single, variables: { id: shopify_id_base64 })
       has_next_page = false
     else
       response = Client.query(Query)
@@ -113,7 +113,7 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
     while has_next_page || page_index.zero?
       page_index += 1
 
-      if product_id.present?
+      if shopify_id_base64.present?
         products = Array(response.data.node)
       else
         products = response.data.products.edges.collect(&:node)
@@ -135,10 +135,12 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
           description: product.description,
           description_html: product.description_html,
           handle: product.handle,
+          slug: product.handle,
           shopify_id_base64: product.id,
           product_type: product.product_type,
           shopify_published_at: DateTime.parse(product.published_at),
           title: product.title,
+          status: 'published',
         })
         forest_shopify_product.save!
 
@@ -160,10 +162,10 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
       end
     end
 
-    # Delete unmatched forest shopify products
-    # Forest::Shopify::Product.where.not(shopify_id_base64: matched_shopify_ids).destroy_all
-    unless product_id.present?
-      # TODO: Update all unmatched products to set shopify status to deleted
+    # Set unmatched forest shopify products to hidden status. We do this rather than just delete
+    # the products in case the user set the product to draft mode in Shopify and may have content
+    # blocks associated with the product in Forest.
+    unless shopify_id_base64.present?
       Forest::Shopify::Product.where.not(shopify_id_base64: matched_shopify_ids).update_all(status: 'hidden')
     end
 

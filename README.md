@@ -67,17 +67,16 @@ $ bundle
 ```
 
 ## TODO
+- Create Shopify liquid template for headless CMS approach (most views should just redirect to a custom
+  domain name, e.g. the Heroku app). The user account login page might need to be styled in Shopify.
 - Add additional sync and webhooks for the following resources
   - Product Collections
 - Better logic for determining price of product with no variants; show this in the index and edit views
 - Determine if discounts are reflected in the current API calls
-- Listen to webhooks to avoid potential of stale data using just a sync task via cron job
 - Document frontend javascript examples of how to interact with the store via the `js-buy-sdk` library.
 - Analytics compatible with Shopify (Google, FB Pixel, etc.)
 - Missing product/variant fields
   - metafields
-  - SelectedOptions on a variant?
-  - Tags?
 
 ## License
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).

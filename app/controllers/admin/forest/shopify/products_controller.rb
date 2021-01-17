@@ -2,12 +2,7 @@ class Admin::Forest::Shopify::ProductsController < Admin::ForestController
   before_action :set_product, only: [:edit, :update, :destroy]
 
   def index
-    @pagy, @products = pagy apply_scopes(Forest::Shopify::Product.by_id)
-  end
-
-  def new
-    @product = Forest::Shopify::Product.new
-    authorize @product
+    @pagy, @products = pagy apply_scopes(Forest::Shopify::Product.by_slug)
   end
 
   def edit
@@ -42,9 +37,8 @@ class Admin::Forest::Shopify::ProductsController < Admin::ForestController
   end
 
   def sync
-    # TODO: move to a background job
-    if Forest::Shopify::Storefront::Product.sync
-      notice = 'Products were successfully synced.'
+    if Forest::Shopify::SyncProductsJob.perform_later
+      notice = 'Product sync initiated in background. This may take some time to complete depending on how large your store is.'
     else
       notice = 'Products failed to sync.'
     end

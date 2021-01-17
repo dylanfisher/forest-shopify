@@ -9,7 +9,7 @@
           <div class="form-inputs">
             <div class="row small-gutters">
               <div class="col-md-6">
-                <%= render 'admin/form_inputs/slug', f: f %>
+                <%= render 'admin/form_inputs/slug', f: f, disabled: true %>
                 <%= f.input :available_for_sale, disabled: true %>
                 <%= f.input :title, disabled: true %>
                 <%= f.input :shopify_id_base64, disabled: true %>
@@ -21,7 +21,7 @@
                 <%= f.button :submit, class: 'btn-success d-md-none' %>
               </div>
               <div class="col-md-6">
-                <%= render 'admin/form_inputs/status', f: f, record: @variant %>
+                <%= render 'admin/form_inputs/status', f: f, record: @variant, disabled: true %>
                 <% if @variant.product.present? %>
                   <label>Product</label>
                   <ul>

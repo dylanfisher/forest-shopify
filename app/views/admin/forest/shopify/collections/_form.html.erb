@@ -9,7 +9,7 @@
           <div class="form-inputs">
             <div class="row small-gutters">
               <div class="col-md-6">
-                <%= render 'admin/form_inputs/slug', f: f %>
+                <%= render 'admin/form_inputs/slug', f: f, disabled: true %>
                 <%= f.input :description, disabled: true %>
                 <%= f.input :description_html, disabled: true %>
                 <%= f.input :handle, disabled: true %>
@@ -20,7 +20,7 @@
                 <%= f.button :submit, class: 'btn-success d-md-none' %>
               </div>
               <div class="col-md-6">
-                <%= render 'admin/form_inputs/status', f: f, record: @collection %>
+                <%= render 'admin/form_inputs/status', f: f, record: @collection, disabled: true %>
                 <%= image_tag @collection.media_item.attachment_url(:medium) if @collection.media_item.present? %>
                 <% if @collection.products.present? %>
                   <label>Products</label>

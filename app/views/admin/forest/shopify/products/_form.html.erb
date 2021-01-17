@@ -9,7 +9,7 @@
           <div class="form-inputs">
             <div class="row small-gutters">
               <div class="col-md-6">
-                <%= render 'admin/form_inputs/slug', f: f %>
+                <%= render 'admin/form_inputs/slug', f: f, disabled: true %>
                 <%= f.input :available_for_sale, disabled: true %>
                 <%= f.input :title, disabled: true %>
                 <%= f.input :shopify_created_at, as: :datepicker, disabled: true %>
@@ -23,7 +23,7 @@
                 <%= f.button :submit, class: 'btn-success d-md-none' %>
               </div>
               <div class="col-md-6">
-                <%= render 'admin/form_inputs/status', f: f, record: @product %>
+                <%= render 'admin/form_inputs/status', f: f, record: @product, disabled: true, hint: 'To hide a product, edit the product in Shopify and remove the product from the Forest CMS sales channel (do this in Shopify by setting the product to draft, deleting the product, or explicitly removing the Forest CMS sales channel).' %>
                 <% if @product.media_items.present? %>
                   <label>Shopify Images</label>
                   <div class="row small-gutters">

@@ -64,6 +64,7 @@ class Forest::Shopify::Storefront::Collection < Forest::Shopify::Storefront
           description: collection.description,
           description_html: collection.description_html,
           handle: collection.handle,
+          slug: collection.handle,
           shopify_id_base64: collection.id,
           shopify_updated_at: DateTime.parse(collection.updated_at),
           title: collection.title,

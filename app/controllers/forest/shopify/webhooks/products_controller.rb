@@ -6,13 +6,13 @@ module Forest
         before_action :set_product, only: [:updated, :destroy]
 
         def create
-          Forest::Shopify::Storefront::Product.sync(@shopify_id_base64)
+          Forest::Shopify::SyncProductsJob.perform_later(shopify_id_base64: @shopify_id_base64)
 
           head :ok
         end
 
         def update
-          Forest::Shopify::Storefront::Product.sync(@shopify_id_base64)
+          Forest::Shopify::SyncProductsJob.perform_later(shopify_id_base64: @shopify_id_base64)
 
           head :ok
         end

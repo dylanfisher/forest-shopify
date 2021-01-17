@@ -1,11 +1,4 @@
 <% content_for :index_header_button_group do %>
-  <% if false # TODO %>
-    <% if Setting.for(:forest_shopify_last_sync_products).to_i > 0 %>
-      <div class="text-muted ml-auto px-3 font-weight-normal h6 my-auto">
-        Last synced <%= time_ago_in_words Time.at(Setting.for(:forest_shopify_last_sync_products).to_i).to_datetime %> ago.
-      </div>
-    <% end %>
-  <% end %>
   <%= form_with url: sync_admin_forest_shopify_products_path, local: true do %>
     <%= submit_tag 'Sync Now', class: 'btn btn-outline-secondary' %>
   <% end %>
@@ -24,7 +17,6 @@
         <th><%= table_sorter title: 'ID', path: :admin_forest_shopify_products_path, scope: :by_id, default_order: :desc %></th>
         <th>Title</th>
         <th>Handle</th>
-        <th>Shopify ID</th>
         <th>Available For Sale</th>
         <th><%= table_sorter title: 'Created&nbsp;at'.html_safe, path: :admin_forest_shopify_products_path, scope: :by_created_at, default_order: :desc %></th>
         <th><%= table_sorter title: 'Updated&nbsp;at'.html_safe, path: :admin_forest_shopify_products_path, scope: :by_updated_at, default_order: :desc %></th>
@@ -42,7 +34,6 @@
           <td><%= product.id %></td>
           <td><%= product.title %></td>
           <td><%= product.handle %></td>
-          <td><%= product.shopify_id %></td>
           <td><%= product.available_for_sale %></td>
           <td><%= forest_date product.created_at %></td>
           <td><%= forest_date product.updated_at %></td>
