@@ -2,21 +2,24 @@
 Sync a Shopify store with a Rails application running Forest CMS.
 
 ## Installation
-Add the following key/values to your Rails credentials file.
+Add the following key/values to your Rails credentials file, or specify an environment variable to override.
+
+The Shopify domain
+
+`my-app.myshopify.com` or override with `ENV['FOREST_SHOPIFY_DOMAIN']`
 
 [The GraphQl endpoint](https://shopify.dev/concepts/about-apis/versioning#calling-an-api-version)
 
-`shopify_graphql_endpoint: 'https://my-app.myshopify.com/api/2021-01/graphql'`
+`shopify_graphql_endpoint: 'https://my-app.myshopify.com/api/2021-01/graphql'` or override with `ENV['FOREST_SHOPIFY_GRAPHQL_ENDPOINT']`
 
 [Shopify Storefront Access Token](https://shopify.dev/docs/storefront-api/getting-started#private-app) (this is the
 public access token used to make unathenticated public API requests - the same token used in your app's frontend JavaScript).
 
-`shopify_storefront_access_token: abcdef123456`
+`shopify_storefront_access_token: abcdef123456` or override with `ENV['FOREST_SHOPIFY_STOREFRONT_ACCESS_TOKEN']`
 
 [Shopify Webhook Secret key](https://shopify.dev/tutorials/manage-webhooks#configuring-webhooks)
 
 `shopify_webhook_key: abcdef123456`
-
 
 ## Rake tasks
 Sync all Shopify storefront API endpoints. Run this in a cron job to keep your store up to date with Shopify.
@@ -57,6 +60,10 @@ In Shopify, configure the following webhook events and URLS in JSON format.
 - `Collection update` -> `https://my-app.com/forest/shopify/webhooks/collections/update`
 - `Collection deletion` -> `https://my-app.com/forest/shopify/webhooks/collections/destroy`
 
+## Frontend JavaScript
+
+Suggested boilerplate for setting up your app's frontend JavaScript is [available on the wiki](https://github.com/dylanfisher/forest-shopify/wiki/Frontend-JavaScript).
+
 ## Installation
 Add this line to your application's Gemfile:
 
@@ -74,10 +81,8 @@ $ bundle
   domain name, e.g. the Heroku app). The user account login page might need to be styled in Shopify.
 - Better logic for determining price of product with no variants; show this in the index and edit views
 - Determine if discounts are reflected in the current API calls
-- Document frontend javascript examples of how to interact with the store via the `js-buy-sdk` library.
+- Document frontend javascript examples of how to interact with the store via the `js-buy-sdk` library. In progress at https://github.com/dylanfisher/forest-shopify/wiki/Frontend-JavaScript.
 - Analytics compatible with Shopify (Google, FB Pixel, etc.)
-- Missing product/variant fields
-  - metafields
 
 ## License
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
