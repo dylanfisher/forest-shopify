@@ -7,6 +7,10 @@ Rails.application.routes.draw do
         post 'products/create', to: 'products#create'
         post 'products/update', to: 'products#update'
         post 'products/destroy', to: 'products#destroy'
+
+        post 'collections/create', to: 'collections#create'
+        post 'collections/update', to: 'collections#update'
+        post 'collections/destroy', to: 'collections#destroy'
       end
     end
   end

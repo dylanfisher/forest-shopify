@@ -53,6 +53,9 @@ In Shopify, configure the following webhook events and URLS in JSON format.
 - `Product creation` -> `https://my-app.com/forest/shopify/webhooks/products/create`
 - `Product update` -> `https://my-app.com/forest/shopify/webhooks/products/update`
 - `Product deletion` -> `https://my-app.com/forest/shopify/webhooks/products/destroy`
+- `Collection creation` -> `https://my-app.com/forest/shopify/webhooks/collections/create`
+- `Collection update` -> `https://my-app.com/forest/shopify/webhooks/collections/update`
+- `Collection deletion` -> `https://my-app.com/forest/shopify/webhooks/collections/destroy`
 
 ## Installation
 Add this line to your application's Gemfile:
@@ -69,8 +72,6 @@ $ bundle
 ## TODO
 - Create Shopify liquid template for headless CMS approach (most views should just redirect to a custom
   domain name, e.g. the Heroku app). The user account login page might need to be styled in Shopify.
-- Add additional sync and webhooks for the following resources
-  - Product Collections
 - Better logic for determining price of product with no variants; show this in the index and edit views
 - Determine if discounts are reflected in the current API calls
 - Document frontend javascript examples of how to interact with the store via the `js-buy-sdk` library.

@@ -125,10 +125,10 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
       products.each do |product|
         matched_shopify_ids << product.id
 
-        # TODO: do we need to check the product/variant position field?
-
         forest_shopify_product = Forest::Shopify::Product.find_or_initialize_by(shopify_id_base64: product.id)
+
         puts "[Forest][Shopify] -- #{product.title}" if Rails.env.development?
+
         forest_shopify_product.assign_attributes({
           available_for_sale: product.available_for_sale,
           shopify_created_at: DateTime.parse(product.created_at),

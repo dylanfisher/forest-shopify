@@ -38,7 +38,7 @@ class Admin::Forest::Shopify::ProductsController < Admin::ForestController
 
   def sync
     if Forest::Shopify::SyncProductsJob.perform_later
-      notice = 'Product sync initiated in background. This may take some time to complete depending on how large your store is.'
+      notice = 'Product sync initiated in a background process. This may take some time to complete depending on how large your store is.'
     else
       notice = 'Products failed to sync.'
     end
