@@ -5,7 +5,7 @@ module Forest
 
       before_action :verify_webhook
 
-      SHARED_SECRET = Rails.application.credentials[:shopify_webhook_key]
+      SHARED_SECRET = ENV['FOREST_SHOPIFY_WEBHOOK_KEY'].presence || Rails.application.credentials[:shopify_webhook_key]
 
       private
 

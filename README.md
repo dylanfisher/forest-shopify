@@ -6,7 +6,7 @@ Add the following key/values to your Rails credentials file, or specify an envir
 
 The Shopify domain
 
-`my-app.myshopify.com` or override with `ENV['FOREST_SHOPIFY_DOMAIN']`
+`shopify_domain: my-app.myshopify.com` or override with `ENV['FOREST_SHOPIFY_DOMAIN']`
 
 [The GraphQl endpoint](https://shopify.dev/concepts/about-apis/versioning#calling-an-api-version)
 
@@ -19,10 +19,10 @@ public access token used to make unathenticated public API requests - the same t
 
 [Shopify Webhook Secret key](https://shopify.dev/tutorials/manage-webhooks#configuring-webhooks)
 
-`shopify_webhook_key: abcdef123456`
+`shopify_webhook_key: abcdef123456` or override with `ENV['FOREST_SHOPIFY_WEBHOOK_KEY']`
 
 ## Rake tasks
-Sync all Shopify storefront API endpoints. Run this in a cron job to keep your store up to date with Shopify.
+The following rake tasks should be configured to run in a cron job to periodically sync products between Shopify and your Rails app.
 
 - `rails forest:shopify:sync` -> Sync all Shopify storefront API endpoints.
 - `rails forest:shopify:sync_products` -> Sync Shopify products and variants.
