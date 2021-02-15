@@ -2,7 +2,7 @@ class Admin::Forest::Shopify::CollectionsController < Admin::ForestController
   before_action :set_collection, only: [:edit, :update, :destroy]
 
   def index
-    @pagy, @collections = pagy apply_scopes(Forest::Shopify::Collection.by_slug)
+    @pagy, @collections = pagy apply_scopes(Forest::Shopify::Collection).by_slug
   end
 
   def new

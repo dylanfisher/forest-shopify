@@ -2,7 +2,7 @@ class Admin::Forest::Shopify::ProductsController < Admin::ForestController
   before_action :set_product, only: [:edit, :update, :destroy]
 
   def index
-    @pagy, @products = pagy apply_scopes(Forest::Shopify::Product.by_slug)
+    @pagy, @products = pagy apply_scopes(Forest::Shopify::Product).by_slug
   end
 
   def edit
