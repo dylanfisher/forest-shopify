@@ -122,10 +122,13 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
 
       puts "[Forest][Shopify] Syncing Products" if Rails.env.development?
 
+      # Look up and store products in a cahe to help limit N+1 query
+      record_cache = Forest::Shopify::Product.where(shopify_id_base64: products.collect(&:id))
+
       products.each do |product|
         matched_shopify_ids << product.id
 
-        forest_shopify_product = Forest::Shopify::Product.find_or_initialize_by(shopify_id_base64: product.id)
+        forest_shopify_product = record_cache.find { |r| r.shopify_id_base64 == product.id }.presence || Forest::Shopify::Product.find_or_initialize_by(shopify_id_base64: product.id)
 
         puts "[Forest][Shopify] -- #{product.title}" if Rails.env.development?
 
@@ -142,7 +145,7 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
           title: product.title,
           status: 'published',
         })
-        forest_shopify_product.save!
+        forest_shopify_product.save! if forest_shopify_product.changed?
 
         images = product.images.edges.collect(&:node)
 
@@ -169,14 +172,6 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
       Forest::Shopify::Product.where.not(shopify_id_base64: matched_shopify_ids).update_all(status: 'hidden')
     end
 
-    # TODO: this won't work with the current implementation of settings, which don't play nicely with the I18n import
-    # # Keep track of the last time the sync was run via a setting
-    # last_run_setting = Setting.find_or_initialize_by(slug: 'forest_shopify_last_sync_products')
-    # last_run_setting.assign_attributes({
-    #   value: Time.current.to_i
-    # })
-    # last_run_setting.save!
-
     true
   end
 
@@ -186,8 +181,13 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
     has_next_page = variants.page_info.has_next_page
     page_index = 1
 
+    record_cache = Forest::Shopify::Variant.where(forest_shopify_product_id: forest_shopify_product.id, shopify_id_base64: nodes.collect(&:id))
+
     nodes.each do |variant|
-      forest_shopify_variant = Forest::Shopify::Variant.find_or_initialize_by({
+      forest_shopify_variant = record_cache.find { |r|
+        r.forest_shopify_product_id == forest_shopify_product.id &&
+        r.shopify_id_base64 == variant.id
+      }.presence || Forest::Shopify::Variant.find_or_initialize_by({
         forest_shopify_product_id: forest_shopify_product.id,
         shopify_id_base64: variant.id
       })
@@ -207,7 +207,7 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
         weight: variant.weight,
         weight_unit: variant.weight_unit
       })
-      forest_shopify_variant.save!
+      forest_shopify_variant.save! if forest_shopify_variant.changed?
 
       create_images(images: variant.image, forest_shopify_record: forest_shopify_variant)
     end
@@ -217,42 +217,26 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
     true
   end
 
-  def self.create_images(images:, forest_shopify_record:)
-    Array(images).each_with_index do |image, index|
-      forest_shopify_image = Forest::Shopify::Image.find_or_initialize_by({
-        forest_shopify_record_id: forest_shopify_record.id,
-        forest_shopify_record_type: forest_shopify_record.class.name,
-        shopify_id_base64: image.id
-      })
-      forest_shopify_image.assign_attributes({
-        alt_text: image.alt_text,
-        src: image.src
-      })
-      if forest_shopify_image.media_item.blank?
-        media_item = MediaItem.new({
-          title: "#{forest_shopify_record.title} image #{index + 1}",
-          alternative_text: image.alt_text,
-          media_item_status: 'hidden'
-        })
-        media_item.attachment = uploader.upload(URI.open(image.src))
-        forest_shopify_image.media_item = media_item
-        media_item.save!
-      end
-      forest_shopify_image.save!
-    end
-  end
-
   def self.create_product_options(product_options:, forest_shopify_record:)
-    Array(product_options).each do |product_option|
-      forest_shopify_product_option = Forest::Shopify::ProductOption.find_or_initialize_by({
+    product_options = Array(product_options)
+
+    record_cache = Forest::Shopify::ProductOption.where(forest_shopify_product_id: forest_shopify_record.id, shopify_id_base64: product_options.collect(&:id))
+
+    product_options.each do |product_option|
+      forest_shopify_product_option = record_cache.find { |r|
+        r.forest_shopify_product_id == forest_shopify_record.id &&
+        r.shopify_id_base64 == product_option.id
+      }.presence || Forest::Shopify::ProductOption.find_or_initialize_by({
         forest_shopify_product_id: forest_shopify_record.id,
         shopify_id_base64: product_option.id
       })
+
       forest_shopify_product_option.assign_attributes({
         name: product_option.name,
         values: product_option.values.to_a
       })
-      forest_shopify_product_option.save!
+
+      forest_shopify_product_option.save! if forest_shopify_product_option.changed?
     end
   end
 end

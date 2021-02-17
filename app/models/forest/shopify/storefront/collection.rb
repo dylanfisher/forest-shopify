@@ -91,7 +91,7 @@ class Forest::Shopify::Storefront::Collection < Forest::Shopify::Storefront
           shopify_updated_at: DateTime.parse(collection.updated_at),
           title: collection.title,
         })
-        forest_shopify_collection.save!
+        forest_shopify_collection.save! if forest_shopify_collection.changed?
 
         # TODO: handle collection product pagination
         collection_product_ids = collection.products.edges.collect(&:node).collect(&:id)

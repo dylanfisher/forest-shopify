@@ -39,8 +39,20 @@ class Forest::Shopify::Storefront
   Client = GraphQL::Client.new(schema: Schema, execute: HTTP)
 
   def self.create_images(images:, forest_shopify_record:)
-    Array(images).each_with_index do |image, index|
-      forest_shopify_image = Forest::Shopify::Image.find_or_initialize_by({
+    images = Array(images)
+
+    record_cache = Forest::Shopify::Image.includes(:media_item).where({
+      forest_shopify_record_id: forest_shopify_record.id,
+      forest_shopify_record_type: forest_shopify_record.class.name,
+      shopify_id_base64: images.collect(&:id)
+    })
+
+    images.each_with_index do |image, index|
+      forest_shopify_image = record_cache.find { |r|
+        r.forest_shopify_record_id == forest_shopify_record.id &&
+        r.forest_shopify_record_type == forest_shopify_record.class.name &&
+        r.shopify_id_base64 == image.id
+      }.presence || Forest::Shopify::Image.find_or_initialize_by({
         forest_shopify_record_id: forest_shopify_record.id,
         forest_shopify_record_type: forest_shopify_record.class.name,
         shopify_id_base64: image.id
@@ -51,7 +63,9 @@ class Forest::Shopify::Storefront
         src: image.src
       })
 
-      if forest_shopify_image.media_item.blank?
+      has_blank_media_item = forest_shopify_image.media_item.blank?
+
+      if has_blank_media_item
         media_item = MediaItem.new({
           title: "#{forest_shopify_record.title} image #{index + 1}",
           alternative_text: image.alt_text,
@@ -63,7 +77,7 @@ class Forest::Shopify::Storefront
         media_item.save!
       end
 
-      forest_shopify_image.save!
+      forest_shopify_image.save! if (forest_shopify_image.changed? || has_blank_media_item)
     end
   end
 
