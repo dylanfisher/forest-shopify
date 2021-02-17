@@ -14,8 +14,10 @@ module Forest::Shopify
       has_one :media_item, through: :image, source: :media_item
     end
 
-    def self.resource_description
-      'Variants represent a Shopify ProductVariant object.'
+    class_methods do
+      def resource_description
+        'Variants represent a Shopify ProductVariant object.'
+      end
     end
 
     def display_price

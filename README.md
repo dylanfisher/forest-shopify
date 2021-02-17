@@ -77,6 +77,7 @@ $ bundle
 ```
 
 ## TODO
+- Document public routes your host app should include (resources for products, collections, etc.)
 - Create Shopify liquid template for headless CMS approach (most views should just redirect to a custom
   domain name, e.g. the Heroku app). The user account login page might need to be styled in Shopify.
 - Better logic for determining price of product with no variants; show this in the index and edit views

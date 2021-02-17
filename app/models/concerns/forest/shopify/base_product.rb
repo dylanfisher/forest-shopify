@@ -24,8 +24,10 @@ module Forest::Shopify
       scope :available_for_sale, -> { where(available_for_sale: true) }
     end
 
-    def self.resource_description
-      'Products are created and managed in Shopify and sync automatically to Forest.'
+    class_methods do
+      def resource_description
+        'Products are created and managed in Shopify and sync automatically to Forest.'
+      end
     end
 
     def slug_attribute
