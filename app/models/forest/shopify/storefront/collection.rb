@@ -73,12 +73,14 @@ class Forest::Shopify::Storefront::Collection < Forest::Shopify::Storefront
         collection_cursor = response.data.collections.edges.last.cursor
       end
 
+      record_cache = Forest::Shopify::Collection.where(shopify_id_base64: collections.collect(&:id))
+
       puts "[Forest][Shopify] Syncing collections" if Rails.env.development?
 
       collections.each do |collection|
         matched_shopify_ids << collection.id
 
-        forest_shopify_collection = Forest::Shopify::Collection.find_or_initialize_by(shopify_id_base64: collection.id)
+        forest_shopify_collection = record_cache.find { |r| r.shopify_id_base64 == collection.id }.presence || Forest::Shopify::Collection.find_or_initialize_by(shopify_id_base64: collection.id)
 
         puts "[Forest][Shopify] -- #{collection.title}" if Rails.env.development?
 
