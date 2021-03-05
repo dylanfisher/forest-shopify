@@ -34,6 +34,7 @@ Forest Shopify adds the following resources to the Forest CMS dashboard.
 - `Forest::Shopify::Product`
 - `Forest::Shopify::Variant`
 - `Forest::Shopify::Collection`
+- `Forest::Shopify::ProductOption`
 
 Add the Forest Shopify resources to your host app's dashboard panel:
 
