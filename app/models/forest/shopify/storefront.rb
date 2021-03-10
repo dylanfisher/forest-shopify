@@ -66,8 +66,10 @@ class Forest::Shopify::Storefront
       has_blank_media_item = forest_shopify_image.media_item.blank?
 
       if has_blank_media_item
+        # Parse the image's filename from the image source
+        title = URI.parse(image.src).path.split('/').last
         media_item = MediaItem.new({
-          title: "#{forest_shopify_record.title} image #{index + 1}",
+          title: title,
           alternative_text: image.alt_text,
           media_item_status: 'hidden'
         })
