@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    forest-shopify (0.1.0)
+    forest-shopify (1.0.0)
       graphql-client
       rails
 
@@ -68,7 +68,7 @@ GEM
       tzinfo (~> 2.0)
       zeitwerk (~> 2.3)
     builder (3.2.4)
-    concurrent-ruby (1.1.7)
+    concurrent-ruby (1.1.8)
     crass (1.0.6)
     erubi (1.10.0)
     globalid (0.4.2)
@@ -77,9 +77,9 @@ GEM
     graphql-client (0.16.0)
       activesupport (>= 3.0)
       graphql (~> 1.8)
-    i18n (1.8.5)
+    i18n (1.8.7)
       concurrent-ruby (~> 1.0)
-    loofah (2.8.0)
+    loofah (2.9.0)
       crass (~> 1.0.2)
       nokogiri (>= 1.5.9)
     mail (2.7.1)
@@ -89,11 +89,11 @@ GEM
     method_source (1.0.0)
     mimemagic (0.3.5)
     mini_mime (1.0.2)
-    mini_portile2 (2.4.0)
-    minitest (5.14.2)
+    minitest (5.14.3)
     nio4r (2.5.4)
-    nokogiri (1.10.10)
-      mini_portile2 (~> 2.4.0)
+    nokogiri (1.11.1-x86_64-darwin)
+      racc (~> 1.4)
+    racc (1.5.2)
     rack (2.2.3)
     rack-test (1.1.0)
       rack (>= 1.0, < 3)
@@ -123,7 +123,7 @@ GEM
       method_source
       rake (>= 0.8.7)
       thor (~> 1.0)
-    rake (13.0.1)
+    rake (13.0.3)
     sprockets (4.0.2)
       concurrent-ruby (~> 1.0)
       rack (> 1, < 3)
@@ -132,8 +132,8 @@ GEM
       activesupport (>= 4.0)
       sprockets (>= 3.0.0)
     sqlite3 (1.4.2)
-    thor (1.0.1)
-    tzinfo (2.0.3)
+    thor (1.1.0)
+    tzinfo (2.0.4)
       concurrent-ruby (~> 1.0)
     websocket-driver (0.7.3)
       websocket-extensions (>= 0.1.0)
@@ -148,4 +148,4 @@ DEPENDENCIES
   sqlite3
 
 BUNDLED WITH
-   2.1.4
+   2.2.3

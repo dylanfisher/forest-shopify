@@ -29,7 +29,7 @@
                   <div class="row small-gutters">
                     <% @product.media_items.each do |media_item| %>
                       <div class="col-6 mb-3">
-                        <%= link_to image_tag(media_item.attachment_url(:medium)), media_item.attachment_url, class: 'blank-link', target: '_blank' %>
+                        <%= link_to image_tag(media_item.attachment_url(:medium)), edit_admin_media_item_path(media_item), class: 'blank-link', target: '_blank' %>
                       </div>
                     <% end %>
                   </div>

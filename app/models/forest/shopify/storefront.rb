@@ -58,16 +58,18 @@ class Forest::Shopify::Storefront
         shopify_id_base64: image.id
       })
 
+      title = URI.parse(image.src).path.split('/').last
+
       forest_shopify_image.assign_attributes({
         alt_text: image.alt_text,
-        src: image.src
+        src: image.src,
+        title: title
       })
 
       has_blank_media_item = forest_shopify_image.media_item.blank?
 
       if has_blank_media_item
         # Parse the image's filename from the image source
-        title = URI.parse(image.src).path.split('/').last
         media_item = MediaItem.new({
           title: title,
           alternative_text: image.alt_text,
