@@ -97,7 +97,16 @@ class Forest::Shopify::Storefront::Collection < Forest::Shopify::Storefront
 
         # TODO: handle collection product pagination
         collection_product_ids = collection.products.edges.collect(&:node).collect(&:id)
-        forest_shopify_collection.products = Forest::Shopify::Product.where(shopify_id_base64: collection_product_ids)
+        forest_shopify_collection_products = Forest::Shopify::Product.where(shopify_id_base64: collection_product_ids)
+        forest_shopify_collection_product_ids = {}
+        forest_shopify_collection_products.each { |p| forest_shopify_collection_product_ids[p.id] = p.shopify_id_base64 }
+        forest_shopify_collection.products = forest_shopify_collection_products
+        forest_shopify_collection.collection_products.each do |collection_product|
+          matching_shopify_id = forest_shopify_collection_product_ids[collection_product.forest_shopify_product_id]
+          position = collection_product_ids.index(matching_shopify_id)
+          collection_product.assign_attributes({ position: position })
+          collection_product.save! if collection_product.changed?
+        end
 
         create_images(images: collection.image, forest_shopify_record: forest_shopify_collection)
       end

@@ -7,7 +7,7 @@ module Forest::Shopify
       include Sluggable
       include Statusable
 
-      has_many :collection_products, class_name: 'Forest::Shopify::CollectionProduct', foreign_key: 'forest_shopify_collection_id', dependent: :destroy
+      has_many :collection_products, -> { order(position: :asc) }, class_name: 'Forest::Shopify::CollectionProduct', foreign_key: 'forest_shopify_collection_id', dependent: :destroy
       has_many :products, through: :collection_products, source: :forest_shopify_product, class_name: 'Forest::Shopify::Product'
 
       has_one :image, -> { order(id: :asc) }, as: :forest_shopify_record, dependent: :destroy
