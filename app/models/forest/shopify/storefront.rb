@@ -38,7 +38,7 @@ class Forest::Shopify::Storefront
 
   Client = GraphQL::Client.new(schema: Schema, execute: HTTP)
 
-  def self.create_images(images:, forest_shopify_record:)
+  def self.create_images(images:, forest_shopify_record:, set_association: false)
     images = Array(images)
 
     record_cache = Forest::Shopify::Image.includes(:media_item).where({
@@ -51,18 +51,19 @@ class Forest::Shopify::Storefront
       forest_shopify_image = record_cache.find { |r|
         r.forest_shopify_record_id == forest_shopify_record.id &&
         r.forest_shopify_record_type == forest_shopify_record.class.name &&
-        r.shopify_id_base64 == image.id
+        r.shopify_id_base64 == image.id &&
+        r.src == image.src
       }.presence || Forest::Shopify::Image.find_or_initialize_by({
         forest_shopify_record_id: forest_shopify_record.id,
         forest_shopify_record_type: forest_shopify_record.class.name,
-        shopify_id_base64: image.id
+        shopify_id_base64: image.id,
+        src: image.src
       })
 
       title = URI.parse(image.src).path.split('/').last
 
       forest_shopify_image.assign_attributes({
         alt_text: image.alt_text,
-        src: image.src,
         title: title
       })
 
@@ -82,6 +83,8 @@ class Forest::Shopify::Storefront
       end
 
       forest_shopify_image.save! if (forest_shopify_image.changed? || has_blank_media_item)
+
+      forest_shopify_record.image = forest_shopify_image if set_association
     end
   end
 

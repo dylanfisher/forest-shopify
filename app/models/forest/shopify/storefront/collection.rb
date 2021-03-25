@@ -108,7 +108,7 @@ class Forest::Shopify::Storefront::Collection < Forest::Shopify::Storefront
           collection_product.save! if collection_product.changed?
         end
 
-        create_images(images: collection.image, forest_shopify_record: forest_shopify_collection)
+        create_images(images: collection.image, forest_shopify_record: forest_shopify_collection, set_association: true)
       end
 
       if has_next_page
