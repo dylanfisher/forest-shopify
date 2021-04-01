@@ -36,7 +36,7 @@ module Forest::Shopify
 
     def to_select2_response
       if featured_media_item.try(:attachment_url, :thumb).present?
-        img_tag = "<img src='#{featured_media_item.attachment_url(:thumb)}' style='height: 20px; margin-right: 5px;'> "
+        img_tag = "<img src='#{featured_media_item.attachment_url(:thumb)}' style='height: 21px; margin-right: 5px;'> "
       end
       "#{img_tag}<span class='select2-response__id' style='margin-right: 5px;'>#{id}</span> #{to_label}"
     end
