@@ -150,7 +150,16 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
         images = product.images.edges.collect(&:node)
 
         # Delete obsolete records that no longer exist in Shopify
-        forest_shopify_product.images.where.not(shopify_id_base64: images.collect(&:id)).destroy_all
+        forest_shopify_product.images.where.not(shopify_id_base64: images.collect(&:id))
+        duplicate_records = []
+        forest_shopify_product.images.group_by(&:shopify_id_base64).each do |shopify_id, records|
+          if records.size > 1
+            duplicate_records.concat(records[0..-2].collect(&:id))
+          end
+        end
+        duplicate_records.flatten!
+        Forest::Shopify::Image.where(id: duplicate_records).destroy_all if duplicate_records.present?
+
         forest_shopify_product.variants.where.not(shopify_id_base64: product.variants.edges.collect(&:node).collect(&:id)).destroy_all
         forest_shopify_product.product_options.where.not(shopify_id_base64: product.options.collect(&:id)).destroy_all
 
