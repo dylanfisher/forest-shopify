@@ -109,7 +109,7 @@ class Forest::Shopify::Storefront::Collection < Forest::Shopify::Storefront
         end
 
         if collection.image.present?
-          create_images(images: collection.image, forest_shopify_record: forest_shopify_collection, set_association: true)
+          create_images(images: collection.image, forest_shopify_record: forest_shopify_collection)
         elsif forest_shopify_collection.image.present?
           forest_shopify_collection.image.destroy
         end

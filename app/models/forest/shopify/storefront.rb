@@ -38,7 +38,12 @@ class Forest::Shopify::Storefront
 
   Client = GraphQL::Client.new(schema: Schema, execute: HTTP)
 
-  def self.create_images(images:, forest_shopify_record:, set_association: false)
+  def self.sync_all
+    Forest::Shopify::SyncProductsJob.perform_now
+    Forest::Shopify::SyncCollectionsJob.perform_now
+  end
+
+  def self.create_images(images:, forest_shopify_record:)
     images = Array(images)
 
     record_cache = Forest::Shopify::Image.includes(:media_item).where({
@@ -46,6 +51,8 @@ class Forest::Shopify::Storefront
       forest_shopify_record_type: forest_shopify_record.class.name,
       shopify_id_base64: images.collect(&:id)
     })
+
+    associated_images = []
 
     images.each_with_index do |image, index|
       forest_shopify_image = record_cache.find { |r|
@@ -84,7 +91,14 @@ class Forest::Shopify::Storefront
 
       forest_shopify_image.save! if (forest_shopify_image.changed? || has_blank_media_item)
 
-      forest_shopify_record.image = forest_shopify_image if set_association
+      associated_images << forest_shopify_image
+
+      forest_shopify_record.image = forest_shopify_image if forest_shopify_record.respond_to?(:image)
+    end
+
+    if forest_shopify_record.respond_to?(:images)
+      obsolete_images = forest_shopify_record.reload.images.where.not(id: associated_images)
+      obsolete_images.destroy_all if obsolete_images.present?
     end
   end
 
