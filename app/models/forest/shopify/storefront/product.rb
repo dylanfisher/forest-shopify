@@ -179,7 +179,7 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
     # the products in case the user set the product to draft mode in Shopify and may have content
     # blocks associated with the product in Forest.
     unless shopify_id_base64.present?
-      Forest::Shopify::Product.where.not(shopify_id_base64: matched_shopify_ids).find_each { |p| p.update(status: 'hidden') }
+      Forest::Shopify::Product.not_hidden.where.not(shopify_id_base64: matched_shopify_ids).find_each { |p| p.update(status: 'hidden') }
     end
 
     true
