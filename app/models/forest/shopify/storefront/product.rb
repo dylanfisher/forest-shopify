@@ -193,7 +193,7 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
 
     record_cache = Forest::Shopify::Variant.where(forest_shopify_product_id: forest_shopify_product.id, shopify_id_base64: nodes.collect(&:id))
 
-    nodes.each do |variant|
+    nodes.each_with_index do |variant, index|
       forest_shopify_variant = record_cache.find { |r|
         r.forest_shopify_product_id == forest_shopify_product.id &&
         r.shopify_id_base64 == variant.id
@@ -215,7 +215,8 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
         selected_options: selected_options,
         sku: variant.sku,
         weight: variant.weight,
-        weight_unit: variant.weight_unit
+        weight_unit: variant.weight_unit,
+        position: index
       })
       forest_shopify_variant.save! if forest_shopify_variant.changed?
 

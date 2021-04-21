@@ -19,7 +19,7 @@ class Admin::Forest::Shopify::VariantsController < Admin::ForestController
     authorize @variant
 
     if @variant.save
-      redirect_to edit_admin_variant_path(@variant), notice: 'Variant was successfully created.'
+      redirect_to edit_admin_forest_shopify_variant_path(@variant), notice: 'Variant was successfully created.'
     else
       render :new
     end
@@ -29,7 +29,7 @@ class Admin::Forest::Shopify::VariantsController < Admin::ForestController
     authorize @variant
 
     if @variant.update(variant_params)
-      redirect_to edit_admin_variant_path(@variant), notice: 'Variant was successfully updated.'
+      redirect_to edit_admin_forest_shopify_variant_path(@variant), notice: 'Variant was successfully updated.'
     else
       render :edit
     end
@@ -45,7 +45,7 @@ class Admin::Forest::Shopify::VariantsController < Admin::ForestController
 
   def variant_params
     # Add blockable params to the permitted attributes if this record is blockable `**BlockSlot.blockable_params`
-    params.require(:variant).permit(:slug, :status, :title, :shopify_id_base64, :price, :availableForSale, :compareAtPrice, :sku, :weight, :weightUnit, :forest_shopify_product_id)
+    params.require(:variant).permit(:slug, :status, :title, :shopify_id_base64, :price, :availableForSale, :compareAtPrice, :sku, :weight, :weightUnit, :position, :forest_shopify_product_id)
   end
 
   def set_variant
