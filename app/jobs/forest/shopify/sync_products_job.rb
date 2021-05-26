@@ -7,7 +7,7 @@ module Forest::Shopify
         Forest::Shopify::Storefront::Product.sync(shopify_id_base64: shopify_id_base64)
       rescue Exception => e
         backtrace = e.backtrace.first(10).join("\n")
-        logger.error { "[Forest][Error] Forest::Shopify::Storefront::Product.sync failed\n#{e.message}\n#{backtrace}" }
+        Rails.logger.error { "[Forest][Error] Forest::Shopify::Storefront::Product.sync failed\n#{e.message}\n#{backtrace}" }
       end
     end
   end
