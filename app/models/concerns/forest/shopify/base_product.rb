@@ -15,10 +15,10 @@ module Forest::Shopify
       has_many :collection_products, class_name: 'Forest::Shopify::CollectionProduct', foreign_key: 'forest_shopify_product_id', dependent: :destroy
       has_many :collections, through: :collection_products, source: :forest_shopify_collection, class_name: 'Forest::Shopify::Collection'
 
-      has_many :images, as: :forest_shopify_record, dependent: :destroy
+      has_many :images, -> { order('forest_shopify_images.position ASC') }, as: :forest_shopify_record, dependent: :destroy
       has_many :media_items, through: :images
 
-      has_one :featured_image, -> { order(id: :asc) }, as: :forest_shopify_record, class_name: 'Forest::Shopify::Image'
+      has_one :featured_image, -> { order('forest_shopify_images.position ASC') }, as: :forest_shopify_record, class_name: 'Forest::Shopify::Image'
       has_one :featured_media_item, through: :featured_image, source: :media_item
 
       scope :available_for_sale, -> { where(available_for_sale: true) }
@@ -39,6 +39,10 @@ module Forest::Shopify
         img_tag = "<img src='#{featured_media_item.attachment_url(:thumb)}' style='height: 21px; margin-right: 5px;'> "
       end
       "#{img_tag}<span class='select2-response__id' style='margin-right: 5px;'>#{id}</span> #{to_label}"
+    end
+
+    def sync
+      Forest::Shopify::Storefront::Product.sync(shopify_id_base64: shopify_id_base64)
     end
   end
 end

@@ -70,8 +70,9 @@ class Forest::Shopify::Storefront
       title = URI.parse(image.src).path.split('/').last
 
       forest_shopify_image.assign_attributes({
+        title: title,
         alt_text: image.alt_text,
-        title: title
+        position: index
       })
 
       has_blank_media_item = forest_shopify_image.media_item.blank?
