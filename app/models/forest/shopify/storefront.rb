@@ -28,7 +28,7 @@ class Forest::Shopify::Storefront
   schema_dir = Rails.root.join('public', 'forest', 'shopify', 'storefront').to_s
   schema_file = "#{schema_dir}/schema.json"
 
-  if !File.exist?(schema_file) || (Time.current - File.mtime(schema_file) > 1.week.seconds)
+  if !File.exist?(schema_file) || (Time.current - File.mtime(schema_file) > 1.week.seconds || File.open(schema_file) { |f| JSON.load(f) }['data'].nil?)
     FileUtils.mkdir_p(schema_dir)
     FileUtils.touch(schema_file)
     GraphQL::Client.dump_schema(Forest::Shopify::Storefront::HTTP, schema_file)

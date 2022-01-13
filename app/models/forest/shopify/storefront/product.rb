@@ -57,22 +57,6 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
         name
         values
       }
-      metafields(first: 250) {
-        edges {
-          cursor
-          node {
-            description
-            id
-            key
-            namespace
-            value
-            valueType
-          }
-        }
-        pageInfo {
-          hasNextPage
-        }
-      }
     }
   GRAPHQL
 
