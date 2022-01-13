@@ -53,6 +53,9 @@ Add the Forest Shopify resources to your host app's dashboard panel:
 Forest Shopify syncs products server-side using GitHub's `graphql-client` library. This code is namespaced
 in the `Forest::Shopify::Storefront` class.
 
+When debugging issues with setting up the initial GraphQL sync, you may need to regenerate the cached schema, especially if
+the initial request to sync the store is misconfigured. This file is located at `public/forest/shopify/storefront/schema.json`.
+
 ## Webhooks
 Configure your application to listen for webhooks configured in Shopify that notify and update products without
 waiting for the sync task to run.
