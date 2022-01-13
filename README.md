@@ -2,6 +2,11 @@
 Sync a Shopify store with a Rails application running Forest CMS.
 
 ## Installation
+
+```ruby
+gem 'forest-shopify', git: 'https://github.com/dylanfisher/forest-shopify.git'
+```
+
 Add the following key/values to your Rails credentials file, or specify an environment variable to override.
 
 The Shopify domain
@@ -48,6 +53,9 @@ Add the Forest Shopify resources to your host app's dashboard panel:
 Forest Shopify syncs products server-side using GitHub's `graphql-client` library. This code is namespaced
 in the `Forest::Shopify::Storefront` class.
 
+When debugging issues with setting up the initial GraphQL sync, you may need to regenerate the cached schema, especially if
+the initial request to sync the store is misconfigured. This file is located at `public/forest/shopify/storefront/schema.json`.
+
 ## Webhooks
 Configure your application to listen for webhooks configured in Shopify that notify and update products without
 waiting for the sync task to run.
@@ -64,18 +72,6 @@ In Shopify, configure the following webhook events and URLS in JSON format.
 ## Frontend JavaScript
 
 Suggested boilerplate for setting up your app's frontend JavaScript is [available on the wiki](https://github.com/dylanfisher/forest-shopify/wiki/Frontend-JavaScript).
-
-## Installation
-Add this line to your application's Gemfile:
-
-```ruby
-gem 'forest-shopify', git: 'https://github.com/dylanfisher/forest-shopify.git'
-```
-
-And then execute:
-```bash
-$ bundle
-```
 
 ## TODO
 - Document public routes your host app should include (resources for products, collections, etc.)
