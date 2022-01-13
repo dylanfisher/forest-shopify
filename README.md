@@ -3,15 +3,8 @@ Sync a Shopify store with a Rails application running Forest CMS.
 
 ## Installation
 
-Add this line to your application's Gemfile:
-
 ```ruby
 gem 'forest-shopify', git: 'https://github.com/dylanfisher/forest-shopify.git'
-```
-
-And then execute:
-```bash
-$ bundle
 ```
 
 Add the following key/values to your Rails credentials file, or specify an environment variable to override.
