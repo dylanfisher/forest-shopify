@@ -3,6 +3,7 @@ class Admin::Forest::Shopify::CollectionsController < Admin::ForestController
 
   def index
     @pagy, @collections = pagy apply_scopes(Forest::Shopify::Collection).by_slug
+    authorize @collections
   end
 
   def new

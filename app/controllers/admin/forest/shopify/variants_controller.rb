@@ -3,6 +3,7 @@ class Admin::Forest::Shopify::VariantsController < Admin::ForestController
 
   def index
     @pagy, @variants = pagy apply_scopes(Forest::Shopify::Variant).by_slug
+    authorize @variants
   end
 
   def new

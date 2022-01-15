@@ -8,6 +8,7 @@ module Admin::Forest::Shopify
 
     def index
       @pagy, @products = pagy apply_scopes(Forest::Shopify::Product.includes(:featured_media_item)).by_slug
+      authorize @products
     end
 
     def edit

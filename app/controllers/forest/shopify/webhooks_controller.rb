@@ -3,6 +3,9 @@ module Forest
     class WebhooksController < ApplicationController
       skip_before_action :verify_authenticity_token
 
+      skip_after_action :verify_policy_scoped
+      skip_after_action :verify_authorized
+
       before_action :verify_webhook
 
       SHARED_SECRET = ENV['FOREST_SHOPIFY_WEBHOOK_KEY'].presence || Rails.application.credentials[:shopify_webhook_key]

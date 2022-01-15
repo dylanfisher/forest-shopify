@@ -147,7 +147,7 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
         forest_shopify_product.variants.where.not(shopify_id_base64: product.variants.edges.collect(&:node).collect(&:id)).destroy_all
         forest_shopify_product.product_options.where.not(shopify_id_base64: product.options.collect(&:id)).destroy_all
 
-        # TODO: do we need to specity the image association like we do with a collection's image association?
+        # TODO: do we need to specify the image association like we do with a collection's image association?
         create_images(images: images, forest_shopify_record: forest_shopify_product)
         create_variants(product: product, forest_shopify_product: forest_shopify_product)
         create_product_options(product_options: product.options, forest_shopify_record: forest_shopify_product)
