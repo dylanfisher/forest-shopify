@@ -69,17 +69,27 @@ In Shopify, configure the following webhook events and URLS in JSON format.
 - `Collection update` -> `https://my-app.com/forest/shopify/webhooks/collections/update`
 - `Collection deletion` -> `https://my-app.com/forest/shopify/webhooks/collections/destroy`
 
-## Frontend JavaScript
+## Routes
+You'll likely want to include the following routes.
 
+```
+get '/cart', to: 'cart#edit'
+get '/shop', to: 'collections#show', id: 'all'
+get '/products', to: redirect('/shop')
+get '/collections/:collection_id/products/:id', to: 'products#show', as: 'collection_product'
+get '/application.css', to: 'asset_redirects#application_css',  format: :css # This provides a static link for use in
+get '/application.js', to: 'asset_redirects#application_js',  format: :js    # This provides a static link for use in
+
+resources :collections, only: [:show]
+resources :products, only: [:show]
+```
+
+## Frontend JavaScript
 Suggested boilerplate for setting up your app's frontend JavaScript is [available on the wiki](https://github.com/dylanfisher/forest-shopify/wiki/Frontend-JavaScript).
 
 ## TODO
-- Document public routes your host app should include (resources for products, collections, etc.)
-- Create Shopify liquid template for headless CMS approach (most views should just redirect to a custom
-  domain name, e.g. the Heroku app). The user account login page might need to be styled in Shopify.
 - Better logic for determining price of product with no variants; show this in the index and edit views
 - Determine if discounts are reflected in the current API calls
-- Document frontend javascript examples of how to interact with the store via the `js-buy-sdk` library. In progress at https://github.com/dylanfisher/forest-shopify/wiki/Frontend-JavaScript.
 - Analytics compatible with Shopify (Google, FB Pixel, etc.)
 
 ## License
