@@ -43,6 +43,8 @@ module Admin::Forest::Shopify
     end
 
     def sync
+      authorize [:forest, :shopify, :product], :sync?
+
       if Forest::Shopify::SyncProductsJob.perform_later
         notice = 'Product sync initiated in a background process. This may take some time to complete depending on how large your store is.'
       else

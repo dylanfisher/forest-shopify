@@ -42,6 +42,18 @@ class Admin::Forest::Shopify::CollectionsController < Admin::ForestController
     redirect_to admin_forest_shopify_collections_url, notice: 'Forest::Shopify::Collection was successfully destroyed.'
   end
 
+  def sync
+    authorize [:forest, :shopify, :collection], :sync?
+
+    if Forest::Shopify::SyncCollectionsJob.perform_later
+      notice = 'Collection sync initiated in a background process. This may take some time to complete depending on how large your store is.'
+    else
+      notice = 'Collections failed to sync.'
+    end
+
+    redirect_to admin_forest_shopify_collections_path, notice: notice
+  end
+
   private
 
   def collection_params

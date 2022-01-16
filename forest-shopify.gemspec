@@ -27,6 +27,4 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "rails"
   spec.add_dependency "graphql-client"
-
-  spec.add_development_dependency "sqlite3"
 end

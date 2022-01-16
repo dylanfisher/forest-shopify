@@ -2,6 +2,8 @@ class Forest::Shopify::Storefront::Collection < Forest::Shopify::Storefront
   # Forest::Shopify::Storefront::Client.query(Forest::Shopify::Storefront::Collection::Query)
   # Forest::Shopify::Storefront::Collection.sync
 
+  LAST_SYNC_SETTING_SLUG = 'forest_shopify_collection_last_sync'
+
   COLLECTION_NODE = <<-'GRAPHQL'
     {
       id
@@ -124,6 +126,7 @@ class Forest::Shopify::Storefront::Collection < Forest::Shopify::Storefront
     # Delete unmatched forest shopify collections
     unless shopify_id_base64.present?
       Forest::Shopify::Collection.where.not(shopify_id_base64: matched_shopify_ids).destroy_all
+      Setting.find_or_create_by(slug: LAST_SYNC_SETTING_SLUG, value_type: 'integer', setting_status: 'hidden').update_columns(value: Time.current.to_i)
     end
 
     true

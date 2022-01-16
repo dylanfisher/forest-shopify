@@ -1,6 +1,13 @@
 <% content_for :index_header_button_group do %>
   <%= form_with url: sync_admin_forest_shopify_products_path, local: true do %>
-    <%= submit_tag 'Sync Now', class: 'btn btn-outline-secondary' %>
+    <div class="d-flex align-items-baseline">
+      <% if Setting.for(Forest::Shopify::Storefront::Product::LAST_SYNC_SETTING_SLUG).present? %>
+        <div class="h6 mr-2">
+          <small>Synced at <span class="text-muted"><%= forest_date Time.at(Setting.for(Forest::Shopify::Storefront::Product::LAST_SYNC_SETTING_SLUG).to_i) %></span></small>
+        </div>
+      <% end %>
+      <%= submit_tag 'Sync Now', class: 'btn btn-outline-secondary' %>
+    </div>
   <% end %>
 <% end %>
 

@@ -19,7 +19,11 @@ Rails.application.routes.draw do
   namespace :admin do
     namespace :forest do
       namespace :shopify do
-        resources :collections, except: [:show, :new]
+        resources :collections, except: [:show, :new] do
+          collection do
+            post 'sync'
+          end
+        end
         resources :products, except: [:show, :new] do
           collection do
             post 'sync'
