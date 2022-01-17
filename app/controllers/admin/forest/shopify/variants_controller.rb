@@ -39,7 +39,7 @@ class Admin::Forest::Shopify::VariantsController < Forest::Shopify::AdminControl
   def destroy
     authorize @variant
     @variant.destroy
-    redirect_to admin_variants_url, notice: 'Variant was successfully destroyed.'
+    redirect_to admin_forest_shopify_variants_url, notice: 'Variant was successfully destroyed.'
   end
 
   private

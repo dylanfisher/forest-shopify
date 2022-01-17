@@ -23,6 +23,11 @@
                 <%= f.input :available_for_sale, disabled: true %>
                 <%= f.input :price, disabled: true %>
                 <%= f.input :compare_at_price, disabled: true %>
+                <% if @variant.media_item.present? %>
+                  <label>Variant image</label>
+                  <br>
+                  <%= link_to image_tag(@variant.media_item.attachment_url(:medium)), edit_admin_media_item_path(@variant.media_item), class: 'blank-link mb-3 d-inline-block', target: '_blank' %>
+                <% end %>
                 <% if @variant.product.present? %>
                   <div class="form-group">
                     <label>Product</label>

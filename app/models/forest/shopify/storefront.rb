@@ -78,16 +78,29 @@ class Forest::Shopify::Storefront
       has_blank_media_item = forest_shopify_image.media_item.blank?
 
       if has_blank_media_item
-        # Parse the image's filename from the image source
-        media_item = MediaItem.new({
-          title: title,
-          alternative_text: image.alt_text,
-          media_item_status: 'hidden'
-        })
+        # Check for the presence of a media item that matches this Shopify Image (it has the same Shopify ID and image src)
+        existing_forest_shopify_image = Forest::Shopify::Image.includes(:media_item).where({
+          shopify_id_base64: image.id,
+          src: image.src
+        }).where.not(id: forest_shopify_image.id).first
 
-        media_item.attachment = uploader.upload(URI.open(image.src))
+        existing_forest_shopify_media_item = existing_forest_shopify_image.media_item if existing_forest_shopify_image.present?
+
+        if existing_forest_shopify_media_item.present?
+          # If a media item with the same image src and Shopify ID already exists, we can reuse this media item
+          media_item = existing_forest_shopify_media_item
+        else
+          # Parse the image's filename from the image source
+          media_item = MediaItem.new({
+            title: title,
+            alternative_text: image.alt_text,
+            media_item_status: 'hidden'
+          })
+          media_item.attachment = uploader.upload(URI.open(image.src))
+        end
+
         forest_shopify_image.media_item = media_item
-        media_item.save!
+        media_item.save! if media_item.new_record?
       end
 
       forest_shopify_image.save! if (forest_shopify_image.changed? || has_blank_media_item)
