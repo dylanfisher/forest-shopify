@@ -10,11 +10,8 @@
             <div class="row small-gutters">
               <div class="col-md-6">
                 <%= render 'admin/form_inputs/slug', f: f, hidden: true %>
-                <%= f.input :available_for_sale, disabled: true %>
                 <%= f.input :title, disabled: true %>
                 <%= f.input :shopify_id_base64, disabled: true %>
-                <%= f.input :price, disabled: true %>
-                <%= f.input :compare_at_price, disabled: true %>
                 <%= f.input :sku, disabled: true %>
                 <%= f.input :weight, disabled: true %>
                 <%= f.input :weight_unit, disabled: true %>
@@ -23,13 +20,27 @@
               </div>
               <div class="col-md-6">
                 <%= render 'admin/form_inputs/status', f: f, record: @variant, disabled: true %>
+                <%= f.input :available_for_sale, disabled: true %>
+                <%= f.input :price, disabled: true %>
+                <%= f.input :compare_at_price, disabled: true %>
                 <% if @variant.product.present? %>
-                  <label>Product</label>
-                  <ul>
-                    <li>
-                      <%= link_to @variant.product.title, edit_admin_forest_shopify_product_path(@variant.product) %>
-                    </li>
-                  </ul>
+                  <div class="form-group">
+                    <label>Product</label>
+                    <div class="row small-gutters align-items-center">
+                      <div class="col-auto">
+                        <% if @variant.product.featured_media_item.present? %>
+                          <%= link_to edit_admin_forest_shopify_product_path(@variant.product), class: 'd-inline-block' do %>
+                            <%= image_tag @variant.product.featured_media_item.attachment_url(:thumb), style: 'width: 50px; height: 50px;' %>
+                          <% end %>
+                        <% else %>
+                          <div style="width: 50px; height: 50px;"></div>
+                        <% end %>
+                      </div>
+                      <div class="col-8">
+                        <%= link_to @variant.product.title, edit_admin_forest_shopify_product_path(@variant.product) %>
+                      </div>
+                    </div>
+                  </div>
                 <% end %>
                 <% if @variant.selected_options.present? && @variant.selected_options.try(:each) %>
                   <label>Selected Options</label>

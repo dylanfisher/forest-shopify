@@ -1,74 +1,138 @@
 <%= simple_form_for([:admin, :forest, :shopify, @product]) do |f| %>
   <%= f.error_notification %>
   <div class="row small-gutters">
-    <%= render 'admin/shared/edit/sidebar', f: f, record: @product %>
+    <% if forest_shopify_domain.present? %>
+      <% sidebar_content = capture do %>
+        <%= link_to "https://#{forest_shopify_domain}/admin/products/#{@product.shopify_id}", target: '_blank' do %>
+          View in Shopify
+          <%= bootstrap_icon 'box-arrow-up-right', embedded: true %>
+        <% end %>
+      <% end %>
+    <% end %>
+    <%= render 'admin/shared/edit/sidebar', f: f, record: @product, additional_content: sidebar_content %>
     <div class="col-md-9">
       <div class="card">
-        <h1 class="h2 card-header"><%= record_name(@product) %></h1>
+        <h1 class="h2 card-header d-flex align-items-center"><%= record_name(@product) %></h1>
         <div class="card-body">
           <div class="form-inputs">
             <div class="row small-gutters">
               <div class="col-md-6">
                 <%= render 'admin/form_inputs/slug', f: f, hidden: true %>
                 <%= f.input :title, disabled: true %>
+                <%= f.input :handle, disabled: true %>
                 <%= f.input :shopify_created_at, as: :datepicker, disabled: true %>
+                <%= f.input :shopify_published_at, as: :datepicker, disabled: true %>
                 <%= f.input :description, disabled: true %>
                 <%= f.input :description_html, disabled: true %>
-                <%= f.input :handle, disabled: true %>
-                <%= f.input :shopify_id, label: 'Shopify ID', disabled: true %>
-                <%= f.input :shopify_id_base64, label: 'Shopify ID (base64 encoded)', disabled: true %>
-                <%= f.input :product_type, disabled: true %>
-                <%= f.input :shopify_published_at, as: :datepicker, disabled: true %>
                 <%= f.button :submit, class: 'btn-success d-md-none' %>
               </div>
               <div class="col-md-6">
                 <%= render 'admin/form_inputs/status', f: f, record: @product, disabled: true, hint: 'To hide a product, open it in Shopify and do one of the following: remove the product from the Forest CMS sales channel, set the product to draft or delete the product.' %>
                 <%= f.input :available_for_sale, disabled: true %>
-                <% if @product.media_items.present? %>
-                  <label>Shopify Images</label>
-                  <div class="row small-gutters">
-                    <% @product.media_items.each do |media_item| %>
-                      <div class="col-6 mb-3">
-                        <%= link_to image_tag(media_item.attachment_url(:medium)), edit_admin_media_item_path(media_item), class: 'blank-link', target: '_blank' %>
-                      </div>
-                    <% end %>
-                  </div>
-                <% end %>
-                <% if @product.collections.present? %>
-                  <label>Collections</label>
-                  <ul>
-                    <% @product.collections.each do |collection| %>
-                      <li>
-                        <%= link_to collection.title, edit_admin_forest_shopify_collection_path(collection) %>
-                      </li>
-                    <% end %>
-                  </ul>
-                <% end %>
-
-                <% if @product.product_options.present? %>
-                  <label>Product Options</label>
-                  <ul>
-                    <% @product.product_options.each do |product_option| %>
-                      <li><%= product_option.name %>: <%= product_option.values.try(:join, ', ') %></li>
-                    <% end %>
-                  </ul>
-                <% end %>
-
-                <% if @product.variants.present? %>
-                  <label>Variants</label>
-                  <ul>
-                    <% @product.variants.each do |variant| %>
-                      <li>
-                        <%= link_to variant.title, edit_admin_forest_shopify_variant_path(variant) %>
-                      </li>
-                    <% end %>
-                  </ul>
-                <% end %>
+                <%= f.input :product_type, disabled: true %>
+                <%= f.input :shopify_id, label: 'Shopify ID', disabled: true %>
+                <%= f.input :shopify_id_base64, label: 'Shopify ID (base64 encoded)', disabled: true %>
               </div>
             </div>
           </div>
         </div>
       </div>
+      <% if @product.media_items.present? %>
+        <div class="card mt-3">
+          <h1 class="h3 card-header">Images</h1>
+          <div class="card-body">
+            <div class="form-inputs">
+              <div class="row small-gutters">
+                <div class="col-md-12">
+                  <div class="row small-gutters mb-n3">
+                    <% @product.media_items.each do |media_item| %>
+                      <div class="col-4 col-md-3 col-xl-2 mb-3">
+                        <%= link_to image_tag(media_item.attachment_url(:medium)), edit_admin_media_item_path(media_item), class: 'blank-link', target: '_blank' %>
+                      </div>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% end %>
+      <% if @product.collections.present? %>
+        <div class="card mt-3">
+          <h1 class="h3 card-header">Collections</h1>
+          <div class="card-body">
+            <div class="form-inputs">
+              <div class="row small-gutters mb-n2">
+                <% @product.collections.each do |collection| %>
+                  <div class="col-6 col-md-3 mb-2">
+                    <div class="row small-gutters align-items-center">
+                      <div class="col-auto">
+                        <% if collection.media_item.present? %>
+                          <%= link_to edit_admin_forest_shopify_collection_path(collection), class: 'd-inline-block' do %>
+                            <%= image_tag collection.media_item.attachment_url(:thumb), style: 'width: 50px;' %>
+                          <% end %>
+                        <% else %>
+                          <div style="width: 50px;"></div>
+                        <% end %>
+                      </div>
+                      <div class="col-8">
+                        <%= link_to collection.title, edit_admin_forest_shopify_collection_path(collection) %>
+                      </div>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% end %>
+      <% if @product.product_options.present? %>
+        <div class="card mt-3">
+          <h1 class="h3 card-header">Product Options</h1>
+          <div class="card-body">
+            <div class="form-inputs">
+              <div class="row small-gutters">
+                <% @product.product_options.each do |product_option| %>
+                  <div class="col-4">
+                    <strong><%= product_option.name %></strong>
+                    <br>
+                    <%= product_option.values.try(:join, ', ') %>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% end %>
+      <% if @product.variants.present? %>
+        <div class="card mt-3">
+          <h1 class="h3 card-header">Variants</h1>
+          <div class="card-body">
+            <div class="form-inputs">
+              <div class="row small-gutters mb-n2">
+                <% @product.variants.includes(:media_item).each do |variant| %>
+                  <div class="col-6 col-md-3 mb-2">
+                    <div class="row small-gutters align-items-center">
+                      <div class="col-auto">
+                        <% if variant.media_item.present? %>
+                          <%= link_to edit_admin_forest_shopify_variant_path(variant), class: 'd-inline-block' do %>
+                            <%= image_tag variant.media_item.attachment_url(:thumb), style: 'width: 50px;' %>
+                          <% end %>
+                        <% else %>
+                          <div style="width: 50px;"></div>
+                        <% end %>
+                      </div>
+                      <div class="col-8">
+                        <%= link_to variant.title, edit_admin_forest_shopify_variant_path(variant) %>
+                      </div>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% end %>
       <%# Uncomment the following partial if the record is blockable. Optionally pass the block_layout or block_kinds to the partial. %>
       <%= render 'admin/block_record/block_layout', f: f, block_layout: @block_layout, block_kinds: @block_kinds %>
     </div>

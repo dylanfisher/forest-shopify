@@ -1,4 +1,4 @@
-class Admin::Forest::Shopify::VariantsController < Admin::ForestController
+class Admin::Forest::Shopify::VariantsController < Forest::Shopify::AdminController
   before_action :set_variant, only: [:edit, :update, :destroy]
 
   def index

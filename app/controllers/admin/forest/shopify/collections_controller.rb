@@ -1,4 +1,4 @@
-class Admin::Forest::Shopify::CollectionsController < Admin::ForestController
+class Admin::Forest::Shopify::CollectionsController < Forest::Shopify::AdminController
   before_action :set_collection, only: [:edit, :update, :destroy]
 
   def index
@@ -13,6 +13,7 @@ class Admin::Forest::Shopify::CollectionsController < Admin::ForestController
 
   def edit
     authorize @collection
+    @pagy, @products = pagy apply_scopes(@collection.products.includes(:featured_media_item)).by_slug
   end
 
   def create
