@@ -88,7 +88,6 @@ resources :products, only: [:show]
 Suggested boilerplate for setting up your app's frontend JavaScript is [available on the wiki](https://github.com/dylanfisher/forest-shopify/wiki/Frontend-JavaScript).
 
 ## TODO
-  It would be much more performant to make it so the variants refer to the same media item in this situation.
 - Better logic for determining price of product with no variants; show this in the index and edit views
 - Determine if discounts are reflected in the current API calls
 - Analytics compatible with Shopify (Google, FB Pixel, etc.)
