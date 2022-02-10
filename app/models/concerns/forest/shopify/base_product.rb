@@ -11,6 +11,8 @@ module Forest::Shopify
       has_one :featured_variant, -> { order('forest_shopify_variants.position ASC') }, class_name: 'Forest::Shopify::Variant', foreign_key: 'forest_shopify_product_id', dependent: :destroy
 
       has_many :product_options, -> { where.not(values: ['Default Title']) }, class_name: 'Forest::Shopify::ProductOption', foreign_key: 'forest_shopify_product_id', dependent: :destroy
+      has_many :product_product_tags, class_name: 'Forest::Shopify::ProductProductTag', foreign_key: 'forest_shopify_product_id', dependent: :destroy
+      has_many :product_tags, class_name: 'Forest::Shopify::ProductTag', through: :product_product_tags
 
       has_many :collection_products, class_name: 'Forest::Shopify::CollectionProduct', foreign_key: 'forest_shopify_product_id', dependent: :destroy
       has_many :collections, through: :collection_products, source: :forest_shopify_collection, class_name: 'Forest::Shopify::Collection'

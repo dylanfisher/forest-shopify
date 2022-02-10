@@ -14,6 +14,7 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
       id
       productType
       publishedAt
+      tags
       title
       variants(first: 250) {
         edges {
@@ -111,6 +112,7 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
       # Look up and store products in a cahe to help limit N+1 query
       record_cache = Forest::Shopify::Product.where(shopify_id_base64: products.collect(&:id))
 
+
       products.each do |product|
         matched_shopify_ids << product.id
 
@@ -153,6 +155,7 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
         create_images(images: images, forest_shopify_record: forest_shopify_product)
         create_variants(product: product, forest_shopify_product: forest_shopify_product)
         create_product_options(product_options: product.options, forest_shopify_record: forest_shopify_product)
+        create_product_tags(product_tags: product.tags, forest_shopify_record: forest_shopify_product)
       end
 
       if has_next_page
@@ -236,5 +239,26 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
 
       forest_shopify_product_option.save! if forest_shopify_product_option.changed?
     end
+  end
+
+  def self.create_product_tags(product_tags:, forest_shopify_record:)
+    product_tags = Array(product_tags)
+
+    record_cache = Forest::Shopify::ProductTag.where(name: product_tags)
+    product_tags_to_associate = []
+
+    product_tags.each do |product_tag_name|
+      forest_shopify_product_tag = record_cache.find { |r|
+        r.name == product_tag_name
+      }.presence || Forest::Shopify::ProductTag.find_or_initialize_by({
+        name: product_tag_name
+      })
+
+      forest_shopify_product_tag.save! if forest_shopify_product_tag.changed?
+
+      product_tags_to_associate << forest_shopify_product_tag
+    end
+
+    forest_shopify_record.product_tags << (forest_shopify_record.product_tags - product_tags_to_associate | product_tags_to_associate - forest_shopify_record.product_tags)
   end
 end
