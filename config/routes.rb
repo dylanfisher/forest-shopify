@@ -1,5 +1,5 @@
 Rails.application.routes.draw do
-  # Public
+  # Webhooks
   namespace :forest do
     namespace :shopify do
       namespace :webhooks do
@@ -29,6 +29,7 @@ Rails.application.routes.draw do
             post 'sync'
           end
         end
+        resources :product_tags, except: [:show, :new]
         resources :variants, except: [:show, :new]
       end
     end

@@ -1,0 +1,27 @@
+<%= simple_form_for([:admin, :forest, :shopify, @product_tag]) do |f| %>
+  <%= f.error_notification %>
+  <div class="row small-gutters">
+    <%= render 'admin/shared/edit/sidebar', f: f, record: @product_tag %>
+    <div class="col-md-9">
+      <div class="card">
+        <h1 class="h2 card-header d-flex align-items-center"><%= record_name(@product_tag) %></h1>
+        <div class="card-body">
+          <div class="form-inputs">
+            <div class="row small-gutters">
+              <div class="col-md-6">
+                <%= render 'admin/form_inputs/slug', f: f, hidden: true %>
+                <%= f.input :name, disabled: true %>
+                <%= f.button :submit, class: 'btn-success d-md-none' %>
+              </div>
+              <div class="col-md-6">
+                <%= f.association :media_item, as: :image %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <%# Uncomment the following partial if the record is blockable. Optionally pass the block_layout or block_kinds to the partial. %>
+      <%#= render 'admin/block_record/block_layout', f: f, block_layout: @block_layout, block_kinds: @block_kinds %>
+    </div>
+  </div>
+<% end %>

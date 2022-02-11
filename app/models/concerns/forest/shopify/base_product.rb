@@ -24,6 +24,8 @@ module Forest::Shopify
       has_one :featured_media_item, through: :featured_image, source: :media_item
 
       scope :available_for_sale, -> { where(available_for_sale: true) }
+      scope :by_publish_date, -> { order(shopify_published_at: :desc) }
+      scope :for_product_tag, -> (tag_slug) { joins(:product_tags).where(product_tags: { slug: tag_slug }) }
     end
 
     class_methods do

@@ -1,0 +1,54 @@
+<%= render 'admin/headers/index', records: @product_tags, model_name: 'Forest::Shopify::ProductTag' %>
+
+<div class="table-responsive">
+  <table class="forest-table table table-striped table-sm">
+    <thead>
+      <tr>
+        <% if Forest::Shopify::ProductTag.statusable? %>
+          <th></th>
+        <% end %>
+        <th></th>
+        <th><%= table_sorter title: 'ID', path: :admin_forest_shopify_product_tags_path, scope: :by_id, default_order: :desc %></th>
+        <th>Name</th>
+        <th>Product Count</th>
+        <th><%= table_sorter title: 'Created&nbsp;at'.html_safe, path: :admin_forest_shopify_product_tags_path, scope: :by_created_at, default_order: :desc %></th>
+        <th><%= table_sorter title: 'Updated&nbsp;at'.html_safe, path: :admin_forest_shopify_product_tags_path, scope: :by_updated_at, default_order: :desc %></th>
+        <th colspan="3"></th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <% @product_tags.includes(:media_item).each do |product_tag| %>
+        <tr>
+          <% if Forest::Shopify::ProductTag.statusable? %>
+            <td><%= status_indicator product_tag %></td>
+          <% end %>
+          <td><%= table_thumbnail(product_tag.media_item) %></td>
+          <td><%= product_tag.id %></td>
+          <td><%= product_tag.name %></td>
+          <td><%= @product_tag_product_counts[product_tag.id] %></td>
+          <td><%= forest_date product_tag.created_at %></td>
+          <td><%= forest_date product_tag.updated_at %></td>
+          <td width="1">
+            <%= link_to 'Edit', edit_admin_forest_shopify_product_tag_path(product_tag), class: 'btn btn-xs btn-primary', role: 'button' %>
+          </td>
+          <% if try('product_tag_path', product_tag) %>
+            <% if product_tag.respond_to?(:to_friendly_param) %>
+              <% param = product_tag.to_friendly_param %>
+            <% else %>
+              <% param = product_tag %>
+            <% end %>
+            <td width="1">
+              <%= link_to 'Show', product_tag_path(param), class: 'btn btn-xs btn-info', role: 'button', data: { turbolinks: false } %>
+            </td>
+          <% end %>
+          <td width="1">
+            <%= link_to 'Destroy', [:admin, :forest, :shopify, product_tag], method: :delete, class: 'btn btn-xs btn-danger', role: 'button', data: { confirm: 'Are you sure you want to destroy this Product Tag?' } %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+
+<%= pagy_bootstrap_nav_js(@pagy).html_safe if @pagy.pages > 1 %>
