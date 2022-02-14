@@ -3,8 +3,8 @@ module Forest
     class WebhooksController < ApplicationController
       skip_before_action :verify_authenticity_token
 
-      skip_after_action :verify_policy_scoped
-      skip_after_action :verify_authorized
+      skip_after_action :verify_policy_scoped, raise: false
+      skip_after_action :verify_authorized, raise: false
 
       before_action :verify_webhook
 
