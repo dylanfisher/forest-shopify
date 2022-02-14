@@ -20,14 +20,10 @@ Rails.application.routes.draw do
     namespace :forest do
       namespace :shopify do
         resources :collections, except: [:show, :new] do
-          collection do
-            post 'sync'
-          end
+          post 'sync', on: :collection
         end
         resources :products, except: [:show, :new] do
-          collection do
-            post 'sync'
-          end
+          post 'sync', on: :collection
         end
         resources :product_tags, except: [:show, :new]
         resources :variants, except: [:show, :new]
