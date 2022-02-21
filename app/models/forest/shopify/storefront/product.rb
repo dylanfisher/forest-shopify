@@ -16,6 +16,15 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
       publishedAt
       tags
       title
+      metafields(first: 250) {
+        edges {
+          node {
+            namespace
+            key
+            value
+          }
+        }
+      }
       variants(first: 250) {
         edges {
           cursor
@@ -112,13 +121,16 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
       # Look up and store products in a cahe to help limit N+1 query
       record_cache = Forest::Shopify::Product.where(shopify_id_base64: products.collect(&:id))
 
-
       products.each do |product|
         matched_shopify_ids << product.id
 
         forest_shopify_product = record_cache.find { |r| r.shopify_id_base64 == product.id }.presence || Forest::Shopify::Product.find_or_initialize_by(shopify_id_base64: product.id)
 
         puts "[Forest][Shopify] -- #{product.title}" if Rails.env.development?
+
+        metafields = product.metafields.edges.collect(&:node)
+        metafields_hash = {}
+        metafields.each { |m| metafields_hash[m.key] = m.value }
 
         forest_shopify_product.assign_attributes({
           available_for_sale: product.available_for_sale,
@@ -132,6 +144,7 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
           shopify_published_at: DateTime.parse(product.published_at),
           title: product.title,
           status: 'published',
+          metafields: metafields_hash
         })
         forest_shopify_product.save! if forest_shopify_product.changed?
 
@@ -259,6 +272,18 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
       product_tags_to_associate << forest_shopify_product_tag
     end
 
-    forest_shopify_record.product_tags << (forest_shopify_record.product_tags - product_tags_to_associate | product_tags_to_associate - forest_shopify_record.product_tags)
+    existing_product_tags_array = forest_shopify_record.product_tags.to_a
+
+    product_tags_to_associate.each do |product_tag|
+      # Associate the product tags with the product if the tag doesn't already exist
+      forest_shopify_record.product_tags << product_tag unless existing_product_tags_array.include?(product_tag)
+    end
+
+    # Find any product tag associations that exist, but weren't in the product_tags_to_associate list. Remove these obsolete tags.
+    product_tags_to_remove = (forest_shopify_record.product_tags - product_tags_to_associate | product_tags_to_associate - forest_shopify_record.product_tags)
+    forest_shopify_record.product_tags.destroy(product_tags_to_remove)
+
+    # Make sure associations are unique without actually triggering a database update if they are already distinct.
+    forest_shopify_record.product_tags = forest_shopify_record.product_tags.uniq
   end
 end

@@ -37,6 +37,28 @@
           </div>
         </div>
       </div>
+      <% if @product.metafields.present? %>
+        <div class="card mt-3">
+          <h1 class="h3 card-header">Metafields</h1>
+          <div class="card-body">
+            <div class="form-inputs">
+              <div class="row small-gutters">
+                <div class="col-md-12">
+                  <div class="row small-gutters mb-n3">
+                    <% @product.metafields.each do |key, value| %>
+                      <div class="col-4 mb-3">
+                        <strong><%= key.titleize %></strong>
+                        <br>
+                        <%= value %>
+                      </div>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% end %>
       <% if @product.media_items.present? %>
         <div class="card mt-3">
           <h1 class="h3 card-header">Images</h1>
@@ -141,7 +163,7 @@
               <div class="row small-gutters">
                 <% @product.product_tags.each do |product_tag| %>
                   <div class="col-4">
-                    <%= product_tag.name %>
+                    <%= link_to product_tag.name, edit_admin_forest_shopify_product_tag_path(product_tag) %>
                   </div>
                 <% end %>
               </div>
