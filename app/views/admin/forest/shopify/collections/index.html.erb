@@ -31,7 +31,7 @@
     </thead>
 
     <tbody>
-      <% @collections.each do |collection| %>
+      <% @collections.includes(:media_item).each do |collection| %>
         <tr>
           <% if Forest::Shopify::Collection.statusable? %>
             <td><%= status_indicator collection %></td>
