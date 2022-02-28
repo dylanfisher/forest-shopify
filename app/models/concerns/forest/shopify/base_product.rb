@@ -20,7 +20,7 @@ module Forest::Shopify
       has_many :images, -> { order('forest_shopify_images.position ASC') }, as: :forest_shopify_record, dependent: :destroy
       has_many :media_items, through: :images
 
-      has_one :featured_image, -> { order('forest_shopify_images.position ASC') }, as: :forest_shopify_record, class_name: 'Forest::Shopify::Image'
+      has_one :featured_image, -> { where(position: 0) }, as: :forest_shopify_record, class_name: 'Forest::Shopify::Image'
       has_one :featured_media_item, through: :featured_image, source: :media_item
 
       scope :available_for_sale, -> { where(available_for_sale: true) }
