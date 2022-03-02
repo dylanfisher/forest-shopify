@@ -3,7 +3,7 @@
     <div class="d-flex align-items-baseline">
       <% if Setting.for(Forest::Shopify::Storefront::Collection::LAST_SYNC_SETTING_SLUG).present? %>
         <div class="h6 mr-2">
-          <small>Synced at <span class="text-muted"><%= forest_date Time.at(Setting.for(Forest::Shopify::Storefront::Collection::LAST_SYNC_SETTING_SLUG).to_i) %></span></small>
+          <small>Synced at <span class="text-muted"><%= forest_date Time.at(Setting.for(Forest::Shopify::Storefront::Collection::LAST_SYNC_SETTING_SLUG).to_i, in: Time.zone) %></span></small>
         </div>
       <% end %>
       <%= submit_tag 'Sync Now', class: 'btn btn-outline-secondary' %>
