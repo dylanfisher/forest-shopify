@@ -14,6 +14,7 @@ class Admin::Forest::Shopify::ProductTagsController < Forest::Shopify::AdminCont
 
   def edit
     authorize @product_tag
+    @pagy, @products = pagy apply_scopes(@product_tag.products.includes(:featured_media_item)).by_slug
   end
 
   def create

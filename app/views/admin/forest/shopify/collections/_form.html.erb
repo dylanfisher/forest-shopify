@@ -39,44 +39,7 @@
           </div>
         </div>
       </div>
-      <div class="card mt-3">
-        <h1 class="h3 card-header">Products</h1>
-        <div class="card-body">
-          <div class="form-inputs">
-            <div class="row small-gutters mb-n2">
-              <% if @products.present? %>
-                <% @products.each do |product| %>
-                  <div class="col-6 col-md-4 col-lg-3 mb-2">
-                    <div class="row small-gutters align-items-center">
-                      <div class="col-auto">
-                        <% if product.featured_media_item.present? %>
-                          <%= link_to edit_admin_forest_shopify_product_path(product), class: 'd-inline-block' do %>
-                            <%= image_tag product.featured_media_item.attachment_url(:thumb), style: 'width: 50px; height: 50px;' %>
-                          <% end %>
-                        <% else %>
-                          <div style="width: 50px; height: 50px;"></div>
-                        <% end %>
-                      </div>
-                      <div class="col-8">
-                        <%= link_to product.title, edit_admin_forest_shopify_product_path(product) %>
-                      </div>
-                    </div>
-                  </div>
-                <% end %>
-              <% else %>
-              <div class="col-12">
-                This collection has no products.
-              </div>
-              <% end %>
-            </div>
-          </div>
-          <% if @pagy.pages > 1 %>
-            <div class="mt-3 mb-n3">
-              <%= pagy_bootstrap_nav_js(@pagy).html_safe %>
-            </div>
-          <% end %>
-        </div>
-      </div>
+      <%= render 'admin/forest/shopify/shared/products_card', products: @products, pagy: @pagy %>
       <%# Uncomment the following partial if the record is blockable. Optionally pass the block_layout or block_kinds to the partial. %>
       <%= render 'admin/block_record/block_layout', f: f, block_layout: @block_layout, block_kinds: @block_kinds %>
     </div>
