@@ -39,6 +39,7 @@
           </div>
         </div>
       </div>
+      <%= render 'admin/forest/shopify/shared/metafields_card', metafields: @collection.metafields if @collection.metafields.present? %>
       <%= render 'admin/forest/shopify/shared/products_card', products: @products, pagy: @pagy %>
       <%# Uncomment the following partial if the record is blockable. Optionally pass the block_layout or block_kinds to the partial. %>
       <%= render 'admin/block_record/block_layout', f: f, block_layout: @block_layout, block_kinds: @block_kinds %>

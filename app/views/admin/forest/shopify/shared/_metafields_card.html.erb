@@ -1,0 +1,20 @@
+<div class="card mt-3">
+  <h1 class="h3 card-header">Metafields</h1>
+  <div class="card-body">
+    <div class="form-inputs">
+      <div class="row small-gutters">
+        <div class="col-md-12">
+          <div class="row small-gutters mb-n3">
+            <% metafields.each do |key, value| %>
+              <div class="col-4 mb-3">
+                <strong><%= key.titleize %></strong>
+                <br>
+                <%= value %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

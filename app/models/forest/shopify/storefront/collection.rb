@@ -12,6 +12,15 @@ class Forest::Shopify::Storefront::Collection < Forest::Shopify::Storefront
       descriptionHtml
       handle
       updatedAt
+      metafields(first: 250) {
+        edges {
+          node {
+            namespace
+            key
+            value
+          }
+        }
+      }
       image {
         altText
         id
@@ -86,6 +95,10 @@ class Forest::Shopify::Storefront::Collection < Forest::Shopify::Storefront
 
         puts "[Forest][Shopify] -- #{collection.title}" if Rails.env.development?
 
+        metafields = collection.metafields.edges.collect(&:node)
+        metafields_hash = {}
+        metafields.each { |m| metafields_hash[m.key] = m.value }
+
         forest_shopify_collection.assign_attributes({
           description: collection.description,
           description_html: collection.description_html,
@@ -94,6 +107,7 @@ class Forest::Shopify::Storefront::Collection < Forest::Shopify::Storefront
           shopify_id_base64: collection.id,
           shopify_updated_at: DateTime.parse(collection.updated_at),
           title: collection.title,
+          metafields: metafields_hash
         })
         forest_shopify_collection.save! if forest_shopify_collection.changed?
 
