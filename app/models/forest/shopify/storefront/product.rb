@@ -183,6 +183,7 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
     unless shopify_id_base64.present?
       Forest::Shopify::Product.not_hidden.where.not(shopify_id_base64: matched_shopify_ids).find_each { |p| p.update(status: 'hidden') }
       Setting.find_or_create_by(slug: LAST_SYNC_SETTING_SLUG, value_type: 'integer', setting_status: 'hidden').update_columns(value: Time.current.to_i)
+      Setting.expire_cache!
     end
 
     true

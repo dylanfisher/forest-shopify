@@ -141,6 +141,7 @@ class Forest::Shopify::Storefront::Collection < Forest::Shopify::Storefront
     unless shopify_id_base64.present?
       Forest::Shopify::Collection.where.not(shopify_id_base64: matched_shopify_ids).destroy_all
       Setting.find_or_create_by(slug: LAST_SYNC_SETTING_SLUG, value_type: 'integer', setting_status: 'hidden').update_columns(value: Time.current.to_i)
+      Setting.expire_cache!
     end
 
     true
