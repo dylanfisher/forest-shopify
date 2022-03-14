@@ -21,7 +21,11 @@ module Forest::Shopify
     end
 
     def display_price
-      "$#{price.sub(/\.00$/, '')}"
+      "$#{price.sub(/\.00$/, '')}" if price.present?
+    end
+
+    def display_compare_at_price
+      "$#{compare_at_price.sub(/\.00$/, '')}" if compare_at_price.present?
     end
   end
 end
