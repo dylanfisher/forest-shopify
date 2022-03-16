@@ -26,6 +26,8 @@ module Forest::Shopify
       scope :available_for_sale, -> { where(available_for_sale: true) }
       scope :by_publish_date, -> { order(shopify_published_at: :desc) }
       scope :for_product_tag, -> (tag_slug) { joins(:product_tags).where(product_tags: { slug: tag_slug }) }
+      scope :for_option_name, -> (option_name) { joins(:product_options).where('LOWER(forest_shopify_product_options.name) = ?', option_name.downcase) }
+      scope :for_option_value, -> (option_value) { joins(:product_options).where("forest_shopify_product_options.values ILIKE '%' || ? || '%'", option_value.downcase) }
     end
 
     class_methods do
