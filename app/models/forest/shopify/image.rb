@@ -9,7 +9,7 @@ module Forest::Shopify
 
     def destroy_orphaned_media_items
       unless Forest::Shopify::Image.exists?(media_item: self.media_item)
-        media_item.destroy
+        self.media_item.destroy if self.media_item.present?
       end
     end
   end
