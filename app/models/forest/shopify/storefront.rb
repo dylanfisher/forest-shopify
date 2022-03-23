@@ -101,19 +101,20 @@ class Forest::Shopify::Storefront
             media_item.attachment = uploader.upload(URI.open(image.src))
           rescue OpenURI::HTTPError => e
             # Rescue OpenURI 404 error, image no longer exists
+            forest_shopify_image = nil
             media_item = nil
           end
         end
 
-        forest_shopify_image.media_item = media_item if media_item.present?
-        media_item.save! if media_item&.new_record?
+        forest_shopify_image.media_item = media_item if (forest_shopify_image.present? && media_item.present?)
+        media_item.save! if (media_item.new_record? && forest_shopify_image.present?)
       end
 
-      forest_shopify_image.save! if (forest_shopify_image.changed? || has_blank_media_item)
-
-      associated_images << forest_shopify_image
-
-      forest_shopify_record.image = forest_shopify_image if forest_shopify_record.respond_to?(:image)
+      if forest_shopify_image.present?
+        forest_shopify_image.save! if (forest_shopify_image.changed? || has_blank_media_item)
+        associated_images << forest_shopify_image
+        forest_shopify_record.image = forest_shopify_image if forest_shopify_record.respond_to?(:image)
+      end
     end
 
     if forest_shopify_record.respond_to?(:images)
