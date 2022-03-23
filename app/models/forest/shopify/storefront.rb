@@ -96,11 +96,17 @@ class Forest::Shopify::Storefront
             alternative_text: image.alt_text,
             media_item_status: 'hidden'
           })
-          media_item.attachment = uploader.upload(URI.open(image.src))
+
+          begin
+            media_item.attachment = uploader.upload(URI.open(image.src))
+          rescue OpenURI::HTTPError => e
+            # Rescue OpenURI 404 error, image no longer exists
+            media_item = nil
+          end
         end
 
-        forest_shopify_image.media_item = media_item
-        media_item.save! if media_item.new_record?
+        forest_shopify_image.media_item = media_item if media_item.present?
+        media_item.save! if media_item&.new_record?
       end
 
       forest_shopify_image.save! if (forest_shopify_image.changed? || has_blank_media_item)
