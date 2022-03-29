@@ -107,7 +107,7 @@ class Forest::Shopify::Storefront
         end
 
         forest_shopify_image.media_item = media_item if (forest_shopify_image.present? && media_item.present?)
-        media_item.save! if (media_item.new_record? && forest_shopify_image.present?)
+        media_item.save! if (media_item&.new_record? && forest_shopify_image&.present?)
       end
 
       if forest_shopify_image.present?
