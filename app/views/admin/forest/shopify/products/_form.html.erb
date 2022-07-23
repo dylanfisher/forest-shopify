@@ -58,6 +58,30 @@
           </div>
         </div>
       <% end %>
+      <% if @product.videos.present? %>
+        <div class="card mt-3">
+          <h1 class="h3 card-header">Videos</h1>
+          <div class="card-body">
+            <div class="form-inputs">
+              <div class="row small-gutters">
+                <div class="col-md-12">
+                  <div class="row small-gutters mb-n3">
+                    <% @product.videos.each do |video| %>
+                      <div class="col-4 mb-3">
+                        <%= content_tag :video, style: 'width: 100%; height: auto;', controls: true do %>
+                          <% video.sources.each do |source| %>
+                            <%= tag :source, src: source['url'], type: source['mime_type'] %>
+                          <% end %>
+                        <% end %>
+                      </div>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% end %>
       <% if @product.variants.present? %>
         <div class="card mt-3">
           <h1 class="h3 card-header">Variants</h1>

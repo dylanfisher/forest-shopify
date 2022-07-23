@@ -4,7 +4,7 @@ class Forest::Shopify::Storefront::Collection < Forest::Shopify::Storefront
 
   LAST_SYNC_SETTING_SLUG = 'forest_shopify_collection_last_sync'
 
-  COLLECTION_NODE = <<-'GRAPHQL'
+  COLLECTION_NODE = <<-"GRAPHQL"
     {
       id
       title

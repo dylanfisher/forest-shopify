@@ -43,6 +43,8 @@ class Forest::Shopify::Storefront
     Forest::Shopify::SyncCollectionsJob.perform_now
   end
 
+  # TODO: update create_images function to use Media query, rather than separate image query, which would
+  # allow us to order images and videos in the proper position.
   def self.create_images(images:, forest_shopify_record:)
     images = Array(images)
 
@@ -120,6 +122,59 @@ class Forest::Shopify::Storefront
     if forest_shopify_record.respond_to?(:images)
       obsolete_images = forest_shopify_record.reload.images.where.not(id: associated_images)
       obsolete_images.destroy_all if obsolete_images.present?
+    end
+  end
+
+  def self.convert_video_sources_to_json(sources)
+    h = []
+    sources.each do |source|
+      h << {
+        url: source.url,
+        mime_type: source.mime_type,
+        format: source.format,
+        height: source.height,
+        width: source.width
+      }
+    end
+    h
+  end
+
+  def self.create_videos(videos:, forest_shopify_record:)
+    videos = Array(videos)
+
+    record_cache = Forest::Shopify::Video.where({
+      forest_shopify_record_id: forest_shopify_record.id,
+      forest_shopify_record_type: forest_shopify_record.class.name,
+      shopify_id_base64: videos.collect(&:id)
+    })
+
+    associated_videos = []
+
+    videos.each_with_index do |video, index|
+      forest_shopify_video = record_cache.find { |r|
+        r.forest_shopify_record_id == forest_shopify_record.id &&
+        r.forest_shopify_record_type == forest_shopify_record.class.name &&
+        r.shopify_id_base64 == video.id
+      }.presence || Forest::Shopify::Video.find_or_initialize_by({
+        forest_shopify_record_id: forest_shopify_record.id,
+        forest_shopify_record_type: forest_shopify_record.class.name,
+        shopify_id_base64: video.id
+      })
+
+      forest_shopify_video.assign_attributes({
+        sources: convert_video_sources_to_json(video.sources),
+        position: index
+      })
+
+      if forest_shopify_video.present?
+        forest_shopify_video.save! if forest_shopify_video.changed?
+        associated_videos << forest_shopify_video
+      end
+
+      if forest_shopify_record.respond_to?(:videos)
+        obsolete_videos = forest_shopify_record.reload.videos.where.not(id: associated_videos)
+        obsolete_videos.destroy_all if obsolete_videos.present?
+      end
     end
   end
 

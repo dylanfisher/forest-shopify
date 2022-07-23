@@ -4,7 +4,7 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
 
   LAST_SYNC_SETTING_SLUG = 'forest_shopify_product_last_sync'
 
-  PRODUCT_NODE = <<-'GRAPHQL'
+  PRODUCT_NODE = <<-"GRAPHQL"
     {
       availableForSale
       createdAt
@@ -64,10 +64,38 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
           hasNextPage
         }
       }
+      media(first: 250) {
+        edges {
+          node {
+            mediaContentType
+            ... MediaFieldsByType
+          }
+        }
+      }
       options(first: 250) {
         id
         name
         values
+      }
+    }
+  GRAPHQL
+
+  MEDIA_FRAGMENT = <<-"GRAPHQL"
+    fragment MediaFieldsByType on Media {
+      ... on Video {
+        id
+        previewImage {
+          altText
+          id
+          src
+        }
+        sources {
+          url
+          mimeType
+          format
+          height
+          width
+        }
       }
     }
   GRAPHQL
@@ -84,6 +112,7 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
         }
       }
     }
+    #{MEDIA_FRAGMENT}
   GRAPHQL
 
   Query_Single = Client.parse <<-"GRAPHQL"
@@ -92,6 +121,7 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
         ... on Product #{PRODUCT_NODE}
       }
     }
+    #{MEDIA_FRAGMENT}
   GRAPHQL
 
   def self.sync(shopify_id_base64: nil)
@@ -148,24 +178,40 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
         })
         forest_shopify_product.save! if forest_shopify_product.changed?
 
+        # Images
         images = product.images.edges.collect(&:node)
 
-        # Delete obsolete records that no longer exist in Shopify
+        # Delete obsolete image records that no longer exist in Shopify
         forest_shopify_product.images.where.not(shopify_id_base64: images.collect(&:id))
-        duplicate_records = []
+        duplicate_image_records = []
         forest_shopify_product.images.group_by(&:shopify_id_base64).each do |shopify_id, records|
           if records.size > 1
-            duplicate_records.concat(records[0..-2].collect(&:id))
+            duplicate_image_records.concat(records[0..-2].collect(&:id))
           end
         end
-        duplicate_records.flatten!
-        Forest::Shopify::Image.where(id: duplicate_records).destroy_all if duplicate_records.present?
+        duplicate_image_records.flatten!
+        Forest::Shopify::Image.where(id: duplicate_image_records).destroy_all if duplicate_image_records.present?
+
+        # Videos
+        videos = product.media.edges.collect(&:node).select { |n| n.media_content_type == 'VIDEO' }
+
+        # Delete obsolete video records that no longer exist in Shopify
+        forest_shopify_product.videos.where.not(shopify_id_base64: videos.collect(&:id))
+        duplicate_video_records = []
+        forest_shopify_product.videos.group_by(&:shopify_id_base64).each do |shopify_id, records|
+          if records.size > 1
+            duplicate_video_records.concat(records[0..-2].collect(&:id))
+          end
+        end
+        duplicate_video_records.flatten!
+        Forest::Shopify::Video.where(id: duplicate_video_records).destroy_all if duplicate_video_records.present?
 
         forest_shopify_product.variants.where.not(shopify_id_base64: product.variants.edges.collect(&:node).collect(&:id)).destroy_all
         forest_shopify_product.product_options.where.not(shopify_id_base64: product.options.collect(&:id)).destroy_all
 
         # TODO: do we need to specify the image association like we do with a collection's image association?
         create_images(images: images, forest_shopify_record: forest_shopify_product)
+        create_videos(videos: videos, forest_shopify_record: forest_shopify_product)
         create_variants(product: product, forest_shopify_product: forest_shopify_product)
         create_product_options(product_options: product.options, forest_shopify_record: forest_shopify_product)
         create_product_tags(product_tags: product.tags, forest_shopify_record: forest_shopify_product)
