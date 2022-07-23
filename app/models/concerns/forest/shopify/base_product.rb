@@ -8,6 +8,7 @@ module Forest::Shopify
       include Statusable
 
       has_many :variants, -> { order('forest_shopify_variants.position ASC') }, class_name: 'Forest::Shopify::Variant', foreign_key: 'forest_shopify_product_id', dependent: :destroy
+      has_many :variants_available_for_sale, -> { order('forest_shopify_variants.position ASC').available_for_sale }, class_name: 'Forest::Shopify::Variant', foreign_key: 'forest_shopify_product_id', dependent: :destroy
       has_one :featured_variant, -> { order('forest_shopify_variants.position ASC') }, class_name: 'Forest::Shopify::Variant', foreign_key: 'forest_shopify_product_id', dependent: :destroy
 
       has_many :product_options, -> { where.not(values: ['Default Title']) }, class_name: 'Forest::Shopify::ProductOption', foreign_key: 'forest_shopify_product_id', dependent: :destroy

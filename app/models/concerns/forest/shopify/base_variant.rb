@@ -12,6 +12,8 @@ module Forest::Shopify
 
       has_one :image, as: :forest_shopify_record, dependent: :destroy
       has_one :media_item, through: :image, source: :media_item
+
+      scope :available_for_sale, -> { where(available_for_sale: true) }
     end
 
     class_methods do
