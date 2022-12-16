@@ -31,6 +31,15 @@ module Forest::Shopify
       scope :for_product_tag, -> (tag_slug) { joins(:product_tags).where(product_tags: { slug: tag_slug }) }
       scope :for_option_name, -> (option_name) { joins(:product_options).where('LOWER(forest_shopify_product_options.name) = ?', option_name.downcase) }
       scope :for_option_value, -> (option_value) { joins(:product_options).where("forest_shopify_product_options.values ILIKE '%' || ? || '%'", option_value.downcase) }
+
+      # Override in your host app to define the metafields you want returned in your GraphQL query.
+      # METAFIELD_IDENTIFIERS = <<-"GRAPHQL"
+      #   [
+      #     { namespace: "forest", key: "size_guide" },
+      #     { namespace: "product.metafields.descriptors", key: "care_guide" }
+      #   ]
+      # GRAPHQL
+      METAFIELD_IDENTIFIERS = []
     end
 
     class_methods do

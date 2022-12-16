@@ -4,6 +4,17 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
 
   LAST_SYNC_SETTING_SLUG = 'forest_shopify_product_last_sync'
 
+  METAFIELDS_NODE = nil
+  #{Forest::Shopify::Product::METAFIELD_IDENTIFIERS}
+  if Forest::Shopify::Product::METAFIELD_IDENTIFIERS.present?
+    METAFIELDS_NODE = <<-"GRAPHQL"
+      metafields(identifiers: #{Forest::Shopify::Product::METAFIELD_IDENTIFIERS}) {
+      key
+      value
+    }
+    GRAPHQL
+  end
+
   PRODUCT_NODE = <<-"GRAPHQL"
     {
       availableForSale
@@ -16,23 +27,19 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
       publishedAt
       tags
       title
-      metafields(first: 250) {
-        edges {
-          node {
-            namespace
-            key
-            value
-          }
-        }
-      }
+      #{METAFIELDS_NODE}
       variants(first: 250) {
         edges {
           cursor
           node {
             availableForSale
-            compareAtPrice
+            compareAtPriceV2 {
+              amount
+            }
             id
-            price
+            priceV2 {
+              amount
+            }
             sku
             title
             weight
@@ -130,6 +137,8 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
       has_next_page = false
     else
       response = Client.query(Query)
+      # TODO: check if response.data is `present?` before continuing
+      # binding.pry
       has_next_page = response.data.products.page_info.has_next_page
     end
 
@@ -149,16 +158,17 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
       puts "[Forest][Shopify] Syncing Products" if Rails.env.development?
 
       # Look up and store products in a cahe to help limit N+1 query
-      record_cache = Forest::Shopify::Product.where(shopify_id_base64: products.collect(&:id))
+      record_cache = Forest::Shopify::Product.where(shopify_id_base64: products.collect { |p| Forest::Shopify::Storefront.encode_shopify_id(p.id) })
 
       products.each do |product|
-        matched_shopify_ids << product.id
+        product_id_base_64 = Forest::Shopify::Storefront.encode_shopify_id(product.id)
+        matched_shopify_ids << product_id_base_64
 
-        forest_shopify_product = record_cache.find { |r| r.shopify_id_base64 == product.id }.presence || Forest::Shopify::Product.find_or_initialize_by(shopify_id_base64: product.id)
+        forest_shopify_product = record_cache.find { |r| r.shopify_id_base64 == product_id_base_64 }.presence || Forest::Shopify::Product.find_or_initialize_by(shopify_id_base64: product_id_base_64)
 
         puts "[Forest][Shopify] -- #{product.title}" if Rails.env.development?
 
-        metafields = product.metafields.edges.collect(&:node)
+        metafields = product.metafields.reject(&:blank?)
         metafields_hash = {}
         metafields.each { |m| metafields_hash[m.key] = m.value }
 
@@ -166,10 +176,10 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
           available_for_sale: product.available_for_sale,
           shopify_created_at: DateTime.parse(product.created_at),
           description: product.description,
-          description_html: product.description_html,
+          description_html: product.description_html.to_s.squish,
           handle: product.handle,
           slug: product.handle,
-          shopify_id_base64: product.id,
+          shopify_id_base64: product_id_base_64,
           product_type: product.product_type,
           shopify_published_at: DateTime.parse(product.published_at),
           title: product.title,
@@ -244,12 +254,13 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
     record_cache = Forest::Shopify::Variant.where(forest_shopify_product_id: forest_shopify_product.id, shopify_id_base64: nodes.collect(&:id))
 
     nodes.each_with_index do |variant, index|
+      variant_id_base_64 = Forest::Shopify::Storefront.encode_shopify_id(variant.id)
       forest_shopify_variant = record_cache.find { |r|
         r.forest_shopify_product_id == forest_shopify_product.id &&
-        r.shopify_id_base64 == variant.id
+        r.shopify_id_base64 == variant_id_base_64
       }.presence || Forest::Shopify::Variant.find_or_initialize_by({
         forest_shopify_product_id: forest_shopify_product.id,
-        shopify_id_base64: variant.id
+        shopify_id_base64: variant_id_base_64
       })
 
       selected_options = {}
@@ -257,11 +268,11 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
 
       puts "[Forest][Shopify] ----  #{variant.title}" if Rails.env.development?
       forest_shopify_variant.assign_attributes({
-        shopify_id_base64: variant.id,
+        shopify_id_base64: variant_id_base_64,
         title: variant.title,
         available_for_sale: variant.available_for_sale,
-        compare_at_price: variant.compare_at_price,
-        price: variant.price,
+        compare_at_price: variant.compare_at_price_v2&.amount,
+        price: variant.price_v2&.amount,
         selected_options: selected_options,
         sku: variant.sku,
         weight: variant.weight,
@@ -281,15 +292,16 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
   def self.create_product_options(product_options:, forest_shopify_record:)
     product_options = Array(product_options)
 
-    record_cache = Forest::Shopify::ProductOption.where(forest_shopify_product_id: forest_shopify_record.id, shopify_id_base64: product_options.collect(&:id))
+    record_cache = Forest::Shopify::ProductOption.where(forest_shopify_product_id: forest_shopify_record.id, shopify_id_base64: product_options.collect { |x| Forest::Shopify::Storefront.encode_shopify_id(x.id) })
 
     product_options.each do |product_option|
+      product_option_id_base_64 = Forest::Shopify::Storefront.encode_shopify_id(product_option.id)
       forest_shopify_product_option = record_cache.find { |r|
         r.forest_shopify_product_id == forest_shopify_record.id &&
-        r.shopify_id_base64 == product_option.id
+        r.shopify_id_base64 == product_option_id_base_64
       }.presence || Forest::Shopify::ProductOption.find_or_initialize_by({
         forest_shopify_product_id: forest_shopify_record.id,
-        shopify_id_base64: product_option.id
+        shopify_id_base64: product_option_id_base_64
       })
 
       forest_shopify_product_option.assign_attributes({

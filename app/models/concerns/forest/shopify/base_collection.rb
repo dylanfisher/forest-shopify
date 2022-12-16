@@ -12,6 +12,15 @@ module Forest::Shopify
 
       has_one :image, -> { order(id: :asc) }, as: :forest_shopify_record, dependent: :destroy
       has_one :media_item, through: :image, source: :media_item
+
+      # Override in your host app to define the metafields you want returned in your GraphQL query.
+      # METAFIELD_IDENTIFIERS = <<-"GRAPHQL"
+      #   [
+      #     { namespace: "forest", key: "size_guide" },
+      #     { namespace: "product.metafields.descriptors", key: "care_guide" }
+      #   ]
+      # GRAPHQL
+      METAFIELD_IDENTIFIERS = []
     end
 
     class_methods do

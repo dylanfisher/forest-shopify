@@ -38,6 +38,10 @@ class Forest::Shopify::Storefront
 
   Client = GraphQL::Client.new(schema: Schema, execute: HTTP)
 
+  def self.encode_shopify_id(guid)
+    Base64.strict_encode64(guid)
+  end
+
   def self.sync_all
     Forest::Shopify::SyncProductsJob.perform_now
     Forest::Shopify::SyncCollectionsJob.perform_now
@@ -51,21 +55,22 @@ class Forest::Shopify::Storefront
     record_cache = Forest::Shopify::Image.includes(:media_item).where({
       forest_shopify_record_id: forest_shopify_record.id,
       forest_shopify_record_type: forest_shopify_record.class.name,
-      shopify_id_base64: images.collect(&:id)
+      shopify_id_base64: images.collect { |x| Forest::Shopify::Storefront.encode_shopify_id(x.id) }
     })
 
     associated_images = []
 
     images.each_with_index do |image, index|
+      image_id_base_64 = Forest::Shopify::Storefront.encode_shopify_id(image.id)
       forest_shopify_image = record_cache.find { |r|
         r.forest_shopify_record_id == forest_shopify_record.id &&
         r.forest_shopify_record_type == forest_shopify_record.class.name &&
-        r.shopify_id_base64 == image.id &&
+        r.shopify_id_base64 == image_id_base_64 &&
         r.src == image.src
       }.presence || Forest::Shopify::Image.find_or_initialize_by({
         forest_shopify_record_id: forest_shopify_record.id,
         forest_shopify_record_type: forest_shopify_record.class.name,
-        shopify_id_base64: image.id,
+        shopify_id_base64: image_id_base_64,
         src: image.src
       })
 
@@ -82,7 +87,7 @@ class Forest::Shopify::Storefront
       if has_blank_media_item
         # Check for the presence of a media item that matches this Shopify Image (it has the same Shopify ID and image src)
         existing_forest_shopify_image = Forest::Shopify::Image.includes(:media_item).where({
-          shopify_id_base64: image.id,
+          shopify_id_base64: image_id_base_64,
           src: image.src
         }).where.not(id: forest_shopify_image.id).first
 
@@ -145,20 +150,21 @@ class Forest::Shopify::Storefront
     record_cache = Forest::Shopify::Video.where({
       forest_shopify_record_id: forest_shopify_record.id,
       forest_shopify_record_type: forest_shopify_record.class.name,
-      shopify_id_base64: videos.collect(&:id)
+      shopify_id_base64: videos.collect { |x| Forest::Shopify::Storefront.encode_shopify_id(x.id) }
     })
 
     associated_videos = []
 
     videos.each_with_index do |video, index|
+      video_id_base_64 = Forest::Shopify::Storefront.encode_shopify_id(video.id)
       forest_shopify_video = record_cache.find { |r|
         r.forest_shopify_record_id == forest_shopify_record.id &&
         r.forest_shopify_record_type == forest_shopify_record.class.name &&
-        r.shopify_id_base64 == video.id
+        r.shopify_id_base64 == video_id_base_64
       }.presence || Forest::Shopify::Video.find_or_initialize_by({
         forest_shopify_record_id: forest_shopify_record.id,
         forest_shopify_record_type: forest_shopify_record.class.name,
-        shopify_id_base64: video.id
+        shopify_id_base64: video_id_base_64
       })
 
       forest_shopify_video.assign_attributes({

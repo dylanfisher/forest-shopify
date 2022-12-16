@@ -4,6 +4,17 @@ class Forest::Shopify::Storefront::Collection < Forest::Shopify::Storefront
 
   LAST_SYNC_SETTING_SLUG = 'forest_shopify_collection_last_sync'
 
+  METAFIELDS_NODE = nil
+  #{Forest::Shopify::Product::METAFIELD_IDENTIFIERS}
+  if Forest::Shopify::Product::METAFIELD_IDENTIFIERS.present?
+    METAFIELDS_NODE = <<-"GRAPHQL"
+      metafields(identifiers: #{Forest::Shopify::Collection::METAFIELD_IDENTIFIERS}) {
+      key
+      value
+    }
+    GRAPHQL
+  end
+
   COLLECTION_NODE = <<-"GRAPHQL"
     {
       id
@@ -12,15 +23,7 @@ class Forest::Shopify::Storefront::Collection < Forest::Shopify::Storefront
       descriptionHtml
       handle
       updatedAt
-      metafields(first: 250) {
-        edges {
-          node {
-            namespace
-            key
-            value
-          }
-        }
-      }
+      #{METAFIELDS_NODE}
       image {
         altText
         id
@@ -84,18 +87,19 @@ class Forest::Shopify::Storefront::Collection < Forest::Shopify::Storefront
         collection_cursor = response.data.collections.edges.last.cursor
       end
 
-      record_cache = Forest::Shopify::Collection.where(shopify_id_base64: collections.collect(&:id))
+      record_cache = Forest::Shopify::Collection.where(shopify_id_base64: collections.collect { |c| Forest::Shopify::Storefront.encode_shopify_id(c.id) })
 
       puts "[Forest][Shopify] Syncing collections" if Rails.env.development?
 
       collections.each do |collection|
-        matched_shopify_ids << collection.id
+        collection_id_base_64 = Forest::Shopify::Storefront.encode_shopify_id(collection.id)
+        matched_shopify_ids << collection_id_base_64
 
-        forest_shopify_collection = record_cache.find { |r| r.shopify_id_base64 == collection.id }.presence || Forest::Shopify::Collection.find_or_initialize_by(shopify_id_base64: collection.id)
+        forest_shopify_collection = record_cache.find { |r| r.shopify_id_base64 == collection_id_base_64 }.presence || Forest::Shopify::Collection.find_or_initialize_by(shopify_id_base64: collection_id_base_64)
 
         puts "[Forest][Shopify] -- #{collection.title}" if Rails.env.development?
 
-        metafields = collection.metafields.edges.collect(&:node)
+        metafields = collection.metafields.reject(&:blank?)
         metafields_hash = {}
         metafields.each { |m| metafields_hash[m.key] = m.value }
 
@@ -104,7 +108,7 @@ class Forest::Shopify::Storefront::Collection < Forest::Shopify::Storefront
           description_html: collection.description_html,
           handle: collection.handle,
           slug: collection.handle,
-          shopify_id_base64: collection.id,
+          shopify_id_base64: collection_id_base_64,
           shopify_updated_at: DateTime.parse(collection.updated_at),
           title: collection.title,
           metafields: metafields_hash
@@ -112,7 +116,7 @@ class Forest::Shopify::Storefront::Collection < Forest::Shopify::Storefront
         forest_shopify_collection.save! if forest_shopify_collection.changed?
 
         # TODO: handle collection product pagination
-        collection_product_ids = collection.products.edges.collect(&:node).collect(&:id)
+        collection_product_ids = collection.products.edges.collect(&:node).collect { |p| Forest::Shopify::Storefront.encode_shopify_id(p.id) }
         forest_shopify_collection_products = Forest::Shopify::Product.where(shopify_id_base64: collection_product_ids)
         forest_shopify_collection_product_ids = {}
         forest_shopify_collection_products.each { |p| forest_shopify_collection_product_ids[p.id] = p.shopify_id_base64 }
