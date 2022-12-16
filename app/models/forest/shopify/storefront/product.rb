@@ -137,9 +137,12 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
       has_next_page = false
     else
       response = Client.query(Query)
-      # TODO: check if response.data is `present?` before continuing
-      # binding.pry
-      has_next_page = response.data.products.page_info.has_next_page
+      if response.try(:errors).present?
+        Rails.logger.error { "[Forest][Error] Forest::Shopify::Storefront::Product.sync failed #{response.errors.messages.to_json}" }
+        return
+      else
+        has_next_page = response.data.products.page_info.has_next_page
+      end
     end
 
     matched_shopify_ids = []
@@ -168,7 +171,7 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
 
         puts "[Forest][Shopify] -- #{product.title}" if Rails.env.development?
 
-        metafields = product.metafields.reject(&:blank?)
+        metafields = Forest::Shopify::Product::METAFIELD_IDENTIFIERS.present? ? product.metafields.reject(&:blank?) : []
         metafields_hash = {}
         metafields.each { |m| metafields_hash[m.key] = m.value }
 
@@ -229,7 +232,12 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
 
       if has_next_page
         response = Client.query(Query, variables: { after: product_cursor })
-        has_next_page = response.data.products.page_info.has_next_page
+        if response.try(:errors).present?
+          Rails.logger.error { "[Forest][Error] Forest::Shopify::Storefront::Product.sync failed #{response.errors.messages.to_json}" }
+          return
+        else
+          has_next_page = response.data.products.page_info.has_next_page
+        end
       end
     end
 
@@ -238,8 +246,11 @@ class Forest::Shopify::Storefront::Product < Forest::Shopify::Storefront
     # blocks associated with the product in Forest.
     unless shopify_id_base64.present?
       Forest::Shopify::Product.not_hidden.where.not(shopify_id_base64: matched_shopify_ids).find_each { |p| p.update(status: 'hidden') }
-      Setting.find_or_create_by(slug: LAST_SYNC_SETTING_SLUG, value_type: 'integer', setting_status: 'hidden').update_columns(value: Time.current.to_i)
-      Setting.expire_cache!
+
+      if Setting.has_attribute?(:setting_status)
+        Setting.find_or_create_by(slug: LAST_SYNC_SETTING_SLUG, value_type: 'integer', setting_status: 'hidden').update_columns(value: Time.current.to_i)
+        Setting.expire_cache!
+      end
     end
 
     true

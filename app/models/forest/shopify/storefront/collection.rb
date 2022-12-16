@@ -99,7 +99,7 @@ class Forest::Shopify::Storefront::Collection < Forest::Shopify::Storefront
 
         puts "[Forest][Shopify] -- #{collection.title}" if Rails.env.development?
 
-        metafields = collection.metafields.reject(&:blank?)
+        metafields = Forest::Shopify::Product::METAFIELD_IDENTIFIERS.present? ? collection.metafields.reject(&:blank?) : []
         metafields_hash = {}
         metafields.each { |m| metafields_hash[m.key] = m.value }
 
@@ -144,8 +144,10 @@ class Forest::Shopify::Storefront::Collection < Forest::Shopify::Storefront
     # Delete unmatched forest shopify collections
     unless shopify_id_base64.present?
       Forest::Shopify::Collection.where.not(shopify_id_base64: matched_shopify_ids).destroy_all
-      Setting.find_or_create_by(slug: LAST_SYNC_SETTING_SLUG, value_type: 'integer', setting_status: 'hidden').update_columns(value: Time.current.to_i)
-      Setting.expire_cache!
+      if Setting.has_attribute?(:setting_status)
+        Setting.find_or_create_by(slug: LAST_SYNC_SETTING_SLUG, value_type: 'integer', setting_status: 'hidden').update_columns(value: Time.current.to_i)
+        Setting.expire_cache!
+      end
     end
 
     true
