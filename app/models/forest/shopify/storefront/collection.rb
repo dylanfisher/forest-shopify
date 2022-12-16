@@ -4,8 +4,6 @@ class Forest::Shopify::Storefront::Collection < Forest::Shopify::Storefront
 
   LAST_SYNC_SETTING_SLUG = 'forest_shopify_collection_last_sync'
 
-  METAFIELDS_NODE = nil
-  #{Forest::Shopify::Product::METAFIELD_IDENTIFIERS}
   if Forest::Shopify::Product::METAFIELD_IDENTIFIERS.present?
     METAFIELDS_NODE = <<-"GRAPHQL"
       metafields(identifiers: #{Forest::Shopify::Collection::METAFIELD_IDENTIFIERS}) {
@@ -13,6 +11,8 @@ class Forest::Shopify::Storefront::Collection < Forest::Shopify::Storefront
       value
     }
     GRAPHQL
+  else
+    METAFIELDS_NODE = nil
   end
 
   COLLECTION_NODE = <<-"GRAPHQL"
