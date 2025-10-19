@@ -61,8 +61,13 @@ module Admin::Forest::Shopify
       params.require(:product).permit(permitted_params)
     end
 
-    def permitted_params
+    def base_product_params
       [:slug, :status, :available_for_sale, :shopify_created_at, :description, :description_html, :handle, :shopify_id, :shopify_id_base64, :product_type, :shopify_published_at, :title, **BlockSlot.blockable_params]
+    end
+
+    # Override in your host app if you need to add additional attributes
+    def permitted_params
+      base_product_params
     end
 
     def set_product
